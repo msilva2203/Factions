@@ -24,7 +24,7 @@ enum class EGameMode : uint8
 //
 
 USTRUCT(BlueprintType)
-struct FGameMode
+struct FGameModeData
 {
 	GENERATED_BODY()
 
