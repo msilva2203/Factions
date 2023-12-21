@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 
 #include "Subsystems/LocalPlayerSubsystem.h"
+#include "Widgets/baseHUD.h"
 
 #include "UserInterfaceSubsystem.generated.h"
 
@@ -38,7 +39,25 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "User Interface")
 	void DisplayMenu(UBaseMenu* MenuToDisplay);
 
+	/**
+	* Push a new HUD element to a HUD layer, creating a new instance of the hud subclass
+	* @param HUDSubclass The subclass of the HUD element you want to add to the hud layer
+	* @return Reference to the newly created HUD element
+	*/
+	UFUNCTION(BlueprintCallable, Category = "User Interface")
+	UBaseHUD* PushHUD(TSubclassOf<UBaseHUD> HUDSubclass);
+
+	/**
+	* Displays every element from the HUD layer specified
+	* @param LayerIndex The layer to display
+	*/
+	UFUNCTION(BlueprintCallable, Category = "User Interface")
+	void DisplayHUD(UBaseHUD* HUDToDisplay);
+
 private:
 	UPROPERTY()
 	TArray<UBaseMenu*> Menus;
+
+	UPROPERTY()
+	TArray<UBaseHUD*> HUD;
 };

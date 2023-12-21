@@ -47,3 +47,30 @@ void UUserInterfaceSubsystem::DisplayMenu(UBaseMenu* MenuToDisplay)
 		}
 	}
 }
+
+UBaseHUD* UUserInterfaceSubsystem::PushHUD(TSubclassOf<UBaseHUD> HUDSubclass)
+{
+	auto Owner = GetLocalPlayer()->PlayerController.Get();
+	auto Element = CreateWidget<UBaseHUD>(Owner, HUDSubclass);
+
+	if (Element)
+	{
+		Element->AddToViewport();
+		Element->SetVisibility(ESlateVisibility::Collapsed);
+
+		HUD.Add(Element);
+	}
+
+	return Element;
+}
+
+void UUserInterfaceSubsystem::DisplayHUD(UBaseHUD* HUDToDisplay)
+{
+	for (auto Element : HUD)
+	{
+		if (Element == HUDToDisplay)
+		{
+			Element->SetVisibility(ESlateVisibility::Visible);
+		}
+	}
+}
