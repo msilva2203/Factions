@@ -43,6 +43,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Radar Subsytem")
 	void SetDisplayRadius(const float NewRadius);
 
+	UFUNCTION()
+	void AddRadarIcon(UBaseRadarIcon* RadarIcon);
+
+	UFUNCTION()
+	void RemoveRadarIcon(UBaseRadarIcon* RadarIcon);
+
 	UPROPERTY(BlueprintReadOnly, Category = "Radar Subsytem")
 	FRadarTransform CenterTransform;
 
@@ -60,5 +66,8 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Radar Subsytem")
 	FOnRadarTransformUpdateDelegate OnRadarCenterTransformUpdate;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Radar Subsytem")
+	TArray<UBaseRadarIcon*> RadarIcons;
 
 };

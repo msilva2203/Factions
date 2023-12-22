@@ -5,14 +5,20 @@
 #include "CoreMinimal.h"
 #include "Factions/Data/MapData.h"
 
-//#include "Factions.generated.h"
-// Uncomment when you add an enum or a struct
+#include "Factions.generated.h"
 
 //
 // ENUMS
 //
 
-
+UENUM(BlueprintType)
+enum class EFactionsTeam : uint8
+{
+	None		UMETA(DisplayName = "NONE"),
+	Enemy		UMETA(DisplayName = "ENEMY"),
+	Team01		UMETA(DisplayName = "TEAM_01"),
+	Team02		UMETA(DisplayName = "TEAM_02")
+};
 
 /**/
 

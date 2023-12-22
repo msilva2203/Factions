@@ -6,12 +6,21 @@
 
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Factions/PlayerStates/MasterPlayerState.h"
+#include "Factions/Interfaces/FactionsEntityInterface.h"
 
 #include "FactionsSessionSubsystem.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(FactionsSessionLog, Log, All);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerUpdateDelegate, AMasterPlayerState*, PlayerState);
+
+UENUM(BlueprintType)
+enum class ETeamComparisonResult : uint8
+{
+	Equal		UMETA(DisplayName = "EQUAL"),
+	Different	UMETA(DisplayName = "DIFFERENT"),
+	Invalid		UMETA(DisplayName = "INVALID")
+};
 
 /**
  * 
@@ -37,6 +46,9 @@ public:
 	*/
 	UFUNCTION()
 	void RemoveSessionPlayerState(AMasterPlayerState* RemovedPlayerState);
+
+	UFUNCTION(BlueprintCallable, Category = "Factions Session")
+	ETeamComparisonResult CompareTeams(AActor* A, AActor* B);
 
 	/**
 	* Player states currently on the session

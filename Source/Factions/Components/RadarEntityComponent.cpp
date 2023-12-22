@@ -45,7 +45,7 @@ void URadarEntityComponent::PushEntity()
 
 	if (Icon)
 	{
-		RadarSubsystem->OnRadarIconPushed.Broadcast(Icon);
+		RadarSubsystem->AddRadarIcon(Icon);
 	}
 }
 
@@ -53,7 +53,7 @@ void URadarEntityComponent::RemoveEntity()
 {
 	if (Icon)
 	{
-		RadarSubsystem->OnRadarIconRemoved.Broadcast(Icon);
+		RadarSubsystem->RemoveRadarIcon(Icon);
 	}
 }
 

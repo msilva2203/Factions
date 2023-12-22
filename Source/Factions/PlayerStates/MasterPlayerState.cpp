@@ -3,11 +3,20 @@
 
 #include "Factions/PlayerStates/MasterPlayerState.h"
 
+#include "Net/UnrealNetwork.h"
 #include "Factions/Subsystems/FactionsSessionSubsystem.h"
 
 AMasterPlayerState::AMasterPlayerState() :
 	bArrived(false)
 {
+}
+
+void AMasterPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	// Enables variable replication
+	DOREPLIFETIME(AMasterPlayerState, PlayerTeam);
 }
 
 void AMasterPlayerState::BeginPlay()
@@ -38,4 +47,14 @@ void AMasterPlayerState::OnRep_PlayerName()
 
 	bArrived = true;
 	OnPlayerArrived.Broadcast();
+}
+
+EFactionsTeam AMasterPlayerState::GetEntityTeam()
+{
+	return PlayerTeam;
+}
+
+void AMasterPlayerState::OnRep_PlayerTeam()
+{
+
 }

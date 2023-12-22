@@ -36,3 +36,17 @@ void UFactionsSessionSubsystem::RemoveSessionPlayerState(AMasterPlayerState* Rem
 		UE_LOG(FactionsSessionLog, Warning, TEXT("Broadcasting player removed to factions subsystem"));
 	}
 }
+
+ETeamComparisonResult UFactionsSessionSubsystem::CompareTeams(AActor* A, AActor* B)
+{
+	IFactionsEntityInterface* InterfaceA = Cast<IFactionsEntityInterface>(A);
+	IFactionsEntityInterface* InterfaceB = Cast<IFactionsEntityInterface>(B);
+
+	if (InterfaceA && InterfaceB)
+	{
+		if (InterfaceA->GetEntityTeam() == InterfaceB->GetEntityTeam())
+			return ETeamComparisonResult::Equal;
+		return ETeamComparisonResult::Different;
+	}
+	return ETeamComparisonResult::Invalid;
+}

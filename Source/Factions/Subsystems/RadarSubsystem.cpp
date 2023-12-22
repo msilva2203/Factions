@@ -26,3 +26,15 @@ void URadarSubsystem::SetDisplayRadius(const float NewRadius)
 {
 	this->DisplayRadius = NewRadius;
 }
+
+void URadarSubsystem::AddRadarIcon(UBaseRadarIcon* RadarIcon)
+{
+	RadarIcons.Add(RadarIcon);
+	OnRadarIconPushed.Broadcast(RadarIcon);
+}
+
+void URadarSubsystem::RemoveRadarIcon(UBaseRadarIcon* RadarIcon)
+{
+	RadarIcons.Remove(RadarIcon);
+	OnRadarIconRemoved.Broadcast(RadarIcon);
+}
