@@ -50,3 +50,12 @@ ETeamComparisonResult UFactionsSessionSubsystem::CompareTeams(AActor* A, AActor*
 	}
 	return ETeamComparisonResult::Invalid;
 }
+
+EFactionsTeam UFactionsSessionSubsystem::GetEntityTeam(AActor* Entity)
+{
+	if (auto Interface = Cast<IFactionsEntityInterface>(Entity))
+	{
+		return Interface->GetEntityTeam();
+	}
+	return EFactionsTeam::None;
+}

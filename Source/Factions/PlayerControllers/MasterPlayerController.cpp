@@ -5,6 +5,11 @@
 
 #include "GameFramework/PlayerState.h"
 
+void AMasterPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
 EFactionsTeam AMasterPlayerController::GetEntityTeam()
 {
 	IFactionsEntityInterface* Interface = Cast<IFactionsEntityInterface>(GetPlayerState<APlayerState>());

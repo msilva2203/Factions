@@ -25,8 +25,14 @@ void URadarEntityComponent::BeginPlay()
 	// ...
 
 	auto Player = GetWorld()->GetFirstPlayerController();
-	RadarSubsystem = Player->GetLocalPlayer()->GetSubsystem<URadarSubsystem>();
-	
+	if (Player)
+	{
+		if (auto LocalPlayer = Player->GetLocalPlayer())
+		{
+			RadarSubsystem = LocalPlayer->GetSubsystem<URadarSubsystem>();
+		}
+	}
+	//RadarSubsystem = Player->GetLocalPlayer()->GetSubsystem<URadarSubsystem>();
 }
 
 

@@ -18,5 +18,7 @@ class FACTIONS_API AMasterPlayerController : public APlayerController, public IF
 	GENERATED_BODY()
 	
 public:
+	virtual void BeginPlay() override;
+
 	virtual EFactionsTeam GetEntityTeam() override;
 };

@@ -50,6 +50,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Factions Session")
 	ETeamComparisonResult CompareTeams(AActor* A, AActor* B);
 
+	UFUNCTION(BlueprintCallable, Category = "Factions Session")
+	EFactionsTeam GetEntityTeam(AActor* Entity);
+
 	/**
 	* Player states currently on the session
 	*/
