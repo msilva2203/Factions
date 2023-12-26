@@ -14,7 +14,7 @@ void UUserInterfaceSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	UE_LOG(LogTemp, Warning, TEXT("User Interface Subsystem initialized"));
 }
 
-UBaseMenu* UUserInterfaceSubsystem::PushMenu(TSubclassOf<UBaseMenu> MenuSubclass)
+UBaseMenu* UUserInterfaceSubsystem::PushMenu(TSubclassOf<UBaseMenu> MenuSubclass, const bool bDisplayImmediately)
 {
 	auto Owner = GetLocalPlayer()->PlayerController.Get();
 	auto Menu = CreateWidget<UBaseMenu>(Owner, MenuSubclass);
@@ -27,6 +27,11 @@ UBaseMenu* UUserInterfaceSubsystem::PushMenu(TSubclassOf<UBaseMenu> MenuSubclass
 		Menus.Add(Menu);
 
 		Menu->Setup();
+
+		if (bDisplayImmediately)
+		{
+			DisplayMenu(Menu);
+		}
 	}
 
 	return Menu;
@@ -44,11 +49,12 @@ void UUserInterfaceSubsystem::DisplayMenu(UBaseMenu* MenuToDisplay)
 			Menu->SetFocus();
 
 			UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(Owner, Menu);
+			//UWidgetBlueprintLibrary::SetInputMode_GameAndUIEx(Owner, Menu, EMouseLockMode::DoNotLock, false);
 		}
 	}
 }
 
-UBaseHUD* UUserInterfaceSubsystem::PushHUD(TSubclassOf<UBaseHUD> HUDSubclass)
+UBaseHUD* UUserInterfaceSubsystem::PushHUD(TSubclassOf<UBaseHUD> HUDSubclass, const bool bDisplayImmediately)
 {
 	auto Owner = GetLocalPlayer()->PlayerController.Get();
 	auto Element = CreateWidget<UBaseHUD>(Owner, HUDSubclass);
@@ -59,6 +65,11 @@ UBaseHUD* UUserInterfaceSubsystem::PushHUD(TSubclassOf<UBaseHUD> HUDSubclass)
 		Element->SetVisibility(ESlateVisibility::Collapsed);
 
 		HUD.Add(Element);
+
+		if (bDisplayImmediately)
+		{
+			DisplayHUD(Element);
+		}
 	}
 
 	return Element;

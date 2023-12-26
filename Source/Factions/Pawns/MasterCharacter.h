@@ -10,6 +10,7 @@
 #include "Factions/Components/RadarEntityComponent.h"
 #include "Factions/Subsystems/RadarSubsystem.h"
 #include "Factions/Interfaces/FactionsEntityInterface.h"
+#include "Factions/Subsystems/FactionsSessionSubsystem.h"
 
 #include "MasterCharacter.generated.h"
 
@@ -27,6 +28,37 @@ enum class EMovementState : uint8
 {
 	Standing		UMETA(DisplayName = "STANDING"),
 	Crouching		UMETA(DisplayName = "CROUCHING")
+};
+
+USTRUCT(BlueprintType)
+struct FInputData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	float MoveForwardValue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	float MoveRightValue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	float LookUpValue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	float LookRightValue;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	bool bHoldingSprint;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	bool bHoldingCrouch;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	bool bHoldingAim;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	bool bHoldingFire;
+
 };
 
 UCLASS()
@@ -53,8 +85,47 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UFUNCTION()
+	virtual void InputMoveForward(float AxisValue);
+
+	UFUNCTION()
+	virtual void InputMoveRight(float AxisValue);
+
+	UFUNCTION()
+	virtual void InputLookUp(float AxisValue);
+
+	UFUNCTION()
+	virtual void InputLookRight(float AxisValue);
+
+	UFUNCTION()
+	virtual void InputSprintPressed();
+
+	UFUNCTION()
+	virtual void InputSprintReleased();
+
+	UFUNCTION()
+	virtual void InputCrouchPressed();
+
+	UFUNCTION()
+	virtual void InputCrouchReleased();
+
+	UFUNCTION()
+	virtual void InputAimPressed();
+
+	UFUNCTION()
+	virtual void InputAimReleased();
+
+	UFUNCTION()
+	virtual void InputFirePressed();
+
+	UFUNCTION()
+	virtual void InputFireReleased();
+
 	UPROPERTY(BlueprintReadOnly, Category = "Character")
 	URadarSubsystem* RadarSubsystem;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Character")
+	UFactionsSessionSubsystem* FactionsSessionSubsystem;
 
 public:	
 	// Called every frame
@@ -89,18 +160,19 @@ public:
 	UPROPERTY(ReplicatedUsing = "OnRep_MovementState", BlueprintReadOnly, Category = "Character")
 	EMovementState MovementState;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Character")
+	FInputData InputData;
+
 private:
 	UFUNCTION(Server, Reliable)
 	void Server_SetCharacterState(const ECharacterState NewCharacterState);
+	void Server_SetCharacterState_Implementation(const ECharacterState NewCharacterState);
+	bool Server_SetCharacterState_Validate(const ECharacterState NewCharacterState);
 
 	UFUNCTION(Server, Reliable)
 	void Server_SetMovementState(const EMovementState NewMovementState);
-
-	UFUNCTION()
-	void Server_SetCharacterState_Implementation(const ECharacterState NewCharacterState);
-
-	UFUNCTION()
 	void Server_SetMovementState_Implementation(const EMovementState NewMovementState);
+	bool Server_SetMovementState_Validate(const EMovementState NewMovementState);
 
 	UFUNCTION()
 	void UpdateCharacterState(const ECharacterState UpdatedCharacterState, const bool bState);

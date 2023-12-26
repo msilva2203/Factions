@@ -45,12 +45,17 @@ void AMasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// General begin play
+
+	// Caches a reference to the factions session subsytem
+	FactionsSessionSubsystem = GetGameInstance()->GetSubsystem<UFactionsSessionSubsystem>();
+
 	if (IsLocallyControlled())
 	{
 		// Local player begin play
 
 		// Caches a reference to the radar subsytem
-		auto LocalPlayer = Cast<APlayerController>(GetController())->GetLocalPlayer();
+		auto LocalPlayer = GetWorld()->GetFirstPlayerController()->GetLocalPlayer();
 		RadarSubsystem = LocalPlayer->GetSubsystem<URadarSubsystem>();
 
 		RadarSubsystem->SetPhysicalRadius(1500.0f);
@@ -63,10 +68,73 @@ void AMasterCharacter::BeginPlay()
 	}
 }
 
+void AMasterCharacter::InputMoveForward(float AxisValue)
+{
+	InputData.MoveForwardValue = AxisValue;
+}
+
+void AMasterCharacter::InputMoveRight(float AxisValue)
+{
+	InputData.MoveRightValue = AxisValue;
+}
+
+void AMasterCharacter::InputLookUp(float AxisValue)
+{
+	InputData.LookUpValue = AxisValue;
+}
+
+void AMasterCharacter::InputLookRight(float AxisValue)
+{
+	InputData.LookRightValue = AxisValue;
+}
+
+void AMasterCharacter::InputSprintPressed()
+{
+	InputData.bHoldingSprint = true;
+}
+
+void AMasterCharacter::InputSprintReleased()
+{
+	InputData.bHoldingSprint = false;
+}
+
+void AMasterCharacter::InputCrouchPressed()
+{
+	InputData.bHoldingCrouch = true;
+}
+
+void AMasterCharacter::InputCrouchReleased()
+{
+	InputData.bHoldingCrouch = false;
+}
+
+void AMasterCharacter::InputAimPressed()
+{
+	InputData.bHoldingAim = true;
+}
+
+void AMasterCharacter::InputAimReleased()
+{
+	InputData.bHoldingAim = false;
+}
+
+void AMasterCharacter::InputFirePressed()
+{
+	InputData.bHoldingFire = true;
+}
+
+void AMasterCharacter::InputFireReleased()
+{
+	InputData.bHoldingFire = false;
+}
+
 // Called every frame
 void AMasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// General tick
+
 
 	if (IsLocallyControlled())
 	{
@@ -77,7 +145,10 @@ void AMasterCharacter::Tick(float DeltaTime)
 		CenterTransform.Translation.X = GetActorLocation().X;
 		CenterTransform.Translation.Y = GetActorLocation().Y;
 		CenterTransform.Angle = GetControlRotation().Yaw + 90.0f;
-		RadarSubsystem->UpdateCenterTransform(CenterTransform);
+		if (RadarSubsystem)
+		{
+			RadarSubsystem->UpdateCenterTransform(CenterTransform);
+		}
 	}
 	else
 	{
@@ -97,6 +168,21 @@ void AMasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	// Bind axis input events
+	PlayerInputComponent->BindAxis("MoveForward", this, &AMasterCharacter::InputMoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &AMasterCharacter::InputMoveRight);
+	PlayerInputComponent->BindAxis("LookUp", this, &AMasterCharacter::InputLookUp);
+	PlayerInputComponent->BindAxis("LookRight", this, &AMasterCharacter::InputLookRight);
+
+	// Bind action input events
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AMasterCharacter::InputSprintPressed);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AMasterCharacter::InputSprintReleased);
+	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AMasterCharacter::InputCrouchPressed);
+	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &AMasterCharacter::InputCrouchReleased);
+	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &AMasterCharacter::InputAimPressed);
+	PlayerInputComponent->BindAction("Aim", IE_Released, this, &AMasterCharacter::InputAimReleased);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AMasterCharacter::InputFirePressed);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AMasterCharacter::InputFireReleased);
 }
 
 EFactionsTeam AMasterCharacter::GetEntityTeam()
@@ -152,9 +238,21 @@ void AMasterCharacter::Server_SetCharacterState_Implementation(const ECharacterS
 	CharacterState = NewCharacterState;
 }
 
+bool AMasterCharacter::Server_SetCharacterState_Validate(const ECharacterState NewCharacterState)
+{
+	// TODO: Implement RPC validation
+	return true;
+}
+
 void AMasterCharacter::Server_SetMovementState_Implementation(const EMovementState NewMovementState)
 {
 	MovementState = NewMovementState;
+}
+
+bool AMasterCharacter::Server_SetMovementState_Validate(const EMovementState NewMovementState)
+{
+	// TODO: Implement RPC validation
+	return true;
 }
 
 void AMasterCharacter::UpdateCharacterState(const ECharacterState UpdatedCharacterState, const bool bState)
@@ -169,6 +267,8 @@ void AMasterCharacter::UpdateCharacterState(const ECharacterState UpdatedCharact
 		break;
 	case ECharacterState::Backpack:
 		break;
+	default:
+		break;
 	}
 
 	// Notify blueprint classes
@@ -182,6 +282,8 @@ void AMasterCharacter::UpdateMovementState(const EMovementState UpdatedMovementS
 	case EMovementState::Standing:
 		break;
 	case EMovementState::Crouching:
+		break;
+	default:
 		break;
 	}
 

@@ -2,7 +2,9 @@
 
 
 #include "Factions/Subsystems/FactionsSessionSubsystem.h"
-#include "FactionsSessionSubsystem.h"
+
+#include "Factions/PlayerControllers/MasterPlayerController.h"
+#include "Factions/GameStates/MasterGameState.h"
 
 DEFINE_LOG_CATEGORY(FactionsSessionLog);
 
@@ -58,4 +60,37 @@ EFactionsTeam UFactionsSessionSubsystem::GetEntityTeam(AActor* Entity)
 		return Interface->GetEntityTeam();
 	}
 	return EFactionsTeam::None;
+}
+
+void UFactionsSessionSubsystem::RegisterPlayersInSession()
+{
+	SessionPlayersData.Empty();
+	auto Players = GetWorld()->GetGameState()->PlayerArray;
+
+	for (auto& Player : Players)
+	{
+		FSessionPlayerData NewData;
+		NewData.PlayerNetId = Player->GetUniqueId().GetUniqueNetId();
+		NewData.Team = GetEntityTeam(Player);
+
+		SessionPlayersData.Add(NewData);
+	}
+}
+
+bool UFactionsSessionSubsystem::GetSessionPlayerData(AMasterPlayerState* Player, FSessionPlayerData& SessionPlayerData)
+{
+	if (!SessionPlayersData.IsEmpty())
+	{
+		for (auto& Data : SessionPlayersData)
+		{
+			auto NetId = Player->GetUniqueId().GetUniqueNetId();
+
+			if (NetId == Data.PlayerNetId)
+			{
+				SessionPlayerData = Data;
+				return true;
+			}
+		}
+	}
+	return false;
 }

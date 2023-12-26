@@ -30,7 +30,7 @@ public:
 	* @return Reference to the newly created menu
 	*/
 	UFUNCTION(BlueprintCallable, Category = "User Interface")
-	UBaseMenu* PushMenu(TSubclassOf<UBaseMenu> MenuSubclass);
+	UBaseMenu* PushMenu(TSubclassOf<UBaseMenu> MenuSubclass, const bool bDisplayImmediately = false);
 
 	/**
 	* Displays a new menu on the player screen
@@ -45,7 +45,7 @@ public:
 	* @return Reference to the newly created HUD element
 	*/
 	UFUNCTION(BlueprintCallable, Category = "User Interface")
-	UBaseHUD* PushHUD(TSubclassOf<UBaseHUD> HUDSubclass);
+	UBaseHUD* PushHUD(TSubclassOf<UBaseHUD> HUDSubclass, const bool bDisplayImmediately = false);
 
 	/**
 	* Displays every element from the HUD layer specified

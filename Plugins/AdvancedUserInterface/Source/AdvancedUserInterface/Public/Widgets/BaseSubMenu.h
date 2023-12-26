@@ -22,6 +22,18 @@ struct FButtonList
 	TArray<UBaseButton*> Buttons;
 };
 
+USTRUCT(BlueprintType)
+struct FCustomAction
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Action")
+	TArray<FString> Keys;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Custom Action")
+	int32 ActionIndex;
+};
+
 /**
  * 
  */
@@ -82,6 +94,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Sub Menu")
 	void ButtonClicked(int32 ListIndex, int32 ButtonIndex);
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Sub Menu")
+	void OnCustomAction(int32 ActionIndex);
+
 	UFUNCTION(BlueprintCallable, Category = "Sub Menu")
 	void Display();
 
@@ -100,15 +115,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Sub Menu")
 	void SelectButton(int32 ListIndex);
 
+	UFUNCTION(BlueprintCallable, Category = "Sub Menu")
+	void PushCustomAction(FCustomAction NewCustomAction);
+
 	UFUNCTION()
 	void OnButtonHovered(int32 ButtonIndex, int32 ListIndex);
 
 	UFUNCTION()
 	void OnButtonClick(int32 ButtonIndex, int32 ListIndex);
 
+	UFUNCTION()
+	TArray<FCustomAction>& GetSubMenuCustomActions();
+
 private:
 	UPROPERTY()
 	TArray<FButtonList> ButtonLists;
+
+	UPROPERTY()
+	TArray<FCustomAction> CustomActions;
 
 	UPROPERTY()
 	bool bIsFocused;

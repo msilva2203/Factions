@@ -17,11 +17,28 @@ class FACTIONS_API ASupplyRaidGameMode : public AMasterGameMode
 {
 	GENERATED_BODY()
 
-	ASupplyRaidGameMode();
-	
 public:
+	ASupplyRaidGameMode();
+
 	virtual void BeginPlay() override;
+
+	virtual void PostLogin(APlayerController* PlayerController) override;
+	//virtual void HandleStartingNewPlayer_Implementation(APlayerController* PlayerController) override;
+	virtual void Logout(AController* Controller) override;
+
+	virtual void PlayerPostLogin(AMasterPlayerController* Player) override;
+	virtual void PlayerLogout(AMasterPlayerController* Player) override;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Supply Raid")
 	ASupplyRaidGameState* SupplyRaidGameState;
+
+public:
+	UFUNCTION(Exec, Category = "Supply Raid")
+	void gm_sr_update_team1reinforcements(const int32 NewValue);
+
+	UFUNCTION(Exec, Category = "Supply Raid")
+	void gm_sr_update_team2reinforcements(const int32 NewValue);
+
+	UFUNCTION(Exec, Category = "Supply Raid")
+	void gm_sr_update_timeremaining(const int32 Time);
 };

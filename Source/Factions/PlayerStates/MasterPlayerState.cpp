@@ -9,6 +9,7 @@
 AMasterPlayerState::AMasterPlayerState() :
 	bArrived(false)
 {
+	NetUpdateFrequency = 100.0f;
 }
 
 void AMasterPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -54,7 +55,16 @@ EFactionsTeam AMasterPlayerState::GetEntityTeam()
 	return PlayerTeam;
 }
 
+void AMasterPlayerState::SetPlayerTeam(const EFactionsTeam NewTeam)
+{
+	if (GetNetMode() < NM_Client)
+	{
+		PlayerTeam = NewTeam;
+		OnRep_PlayerTeam();
+	}
+}
+
 void AMasterPlayerState::OnRep_PlayerTeam()
 {
-
+	OnPlayerTeamUpdated.Broadcast(PlayerTeam);
 }

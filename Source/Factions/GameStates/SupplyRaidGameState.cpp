@@ -36,12 +36,17 @@ void ASupplyRaidGameState::BeginPlay()
 	OnRep_RemainingTime();
 }
 
-void ASupplyRaidGameState::SetRemainingTime(const int32 Time)
+void ASupplyRaidGameState::SetRemainingTime(const int32 Time, const bool bForce)
 {
 	if (GetWorld()->GetNetMode() < ENetMode::NM_Client)
 	{
 		RemainingTime = Time;
 		OnRep_RemainingTime();
+
+		if (bForce)
+		{
+			NetMulticast_SetRemainingTime(RemainingTime);
+		}
 	}
 }
 
@@ -112,7 +117,7 @@ void ASupplyRaidGameState::OnGameTimerUpdate()
 	OnRep_RemainingTime();
 }
 
-void ASupplyRaidGameState::Client_SetRemainingTime_Implementation(const int32 Time)
+void ASupplyRaidGameState::NetMulticast_SetRemainingTime_Implementation(const int32 Time)
 {
 	RemainingTime = Time;
 	OnRep_RemainingTime();

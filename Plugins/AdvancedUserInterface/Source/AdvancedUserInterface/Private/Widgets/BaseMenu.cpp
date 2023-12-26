@@ -111,7 +111,19 @@ FReply UBaseMenu::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& 
 				{
 					// Custom key events
 
-
+					const auto KeyName = Key.GetDisplayName();
+					auto CustomActions = DisplayedSubMenu->GetSubMenuCustomActions();
+					for (auto CustomAction : CustomActions)
+					{
+						for (auto K : CustomAction.Keys)
+						{
+							if (KeyName.ToString() == K)
+							{
+								DisplayedSubMenu->OnCustomAction(CustomAction.ActionIndex);
+								break;
+							}
+						}
+					}
 				}
 			}
 

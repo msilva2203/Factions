@@ -4,6 +4,7 @@
 #include "Factions/PlayerControllers/MasterPlayerController.h"
 
 #include "GameFramework/PlayerState.h"
+#include "Factions/PlayerStates/MasterPlayerState.h"
 
 void AMasterPlayerController::BeginPlay()
 {
@@ -18,4 +19,14 @@ EFactionsTeam AMasterPlayerController::GetEntityTeam()
 		return Interface->GetEntityTeam();
 	}
 	return EFactionsTeam::None;
+}
+
+void AMasterPlayerController::Client_SetPlayerTeam_Implementation(const EFactionsTeam NewTeam)
+{
+	Server_SetPlayerTeam(NewTeam);
+}
+
+void AMasterPlayerController::Server_SetPlayerTeam_Implementation(const EFactionsTeam NewTeam)
+{
+	GetPlayerState<AMasterPlayerState>()->SetPlayerTeam(NewTeam);
 }

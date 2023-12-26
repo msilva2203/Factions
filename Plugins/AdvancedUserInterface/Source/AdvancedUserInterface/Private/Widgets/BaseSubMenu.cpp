@@ -132,6 +132,11 @@ void UBaseSubMenu::SelectButton(int32 ListIndex)
 	OnButtonClick(Index, ListIndex);
 }
 
+void UBaseSubMenu::PushCustomAction(FCustomAction NewCustomAction)
+{
+	CustomActions.Add(NewCustomAction);
+}
+
 void UBaseSubMenu::OnButtonHovered(int32 ButtonIndex, int32 ListIndex)
 {
 	if (bIsFocused)
@@ -147,4 +152,9 @@ void UBaseSubMenu::OnButtonClick(int32 ButtonIndex, int32 ListIndex)
 		ButtonLists[ListIndex].Buttons[ButtonIndex]->Selected();
 		ButtonClicked(ListIndex, ButtonIndex);
 	}
+}
+
+TArray<FCustomAction>& UBaseSubMenu::GetSubMenuCustomActions()
+{
+	return CustomActions;
 }

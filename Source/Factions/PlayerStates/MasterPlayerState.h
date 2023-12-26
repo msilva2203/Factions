@@ -11,6 +11,7 @@
 #include "MasterPlayerState.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerArrivedDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTeamUpdatedDelegate, EFactionsTeam, Team);
 
 /**
  * 
@@ -20,11 +21,11 @@ class FACTIONS_API AMasterPlayerState : public APlayerState, public IFactionsEnt
 {
 	GENERATED_BODY()
 	
+public:
 	AMasterPlayerState();
 
-	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
@@ -32,11 +33,17 @@ public:
 
 	virtual EFactionsTeam GetEntityTeam() override;
 
+	UFUNCTION()
+	void SetPlayerTeam(const EFactionsTeam NewTeam);
+
 	/**
 	* Player arrived event, used to update lobby player lists
 	*/
 	UPROPERTY(BlueprintAssignable, Category = "Master Player State")
 	FOnPlayerArrivedDelegate OnPlayerArrived;
+
+	UPROPERTY(BlueprintAssignable, Category = "Master Player State")
+	FOnTeamUpdatedDelegate OnPlayerTeamUpdated;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Master Player State")
 	bool bArrived;

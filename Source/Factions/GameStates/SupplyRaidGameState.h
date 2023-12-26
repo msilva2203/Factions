@@ -21,15 +21,15 @@ class FACTIONS_API ASupplyRaidGameState : public AMasterGameState
 {
 	GENERATED_BODY()
 	
+public:
 	ASupplyRaidGameState();
 
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
-public:
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable, Category = "Supply Raid")
-	void SetRemainingTime(const int32 Time);
+	void SetRemainingTime(const int32 Time, const bool bForce = false);
 
 	UFUNCTION(BlueprintCallable, Category = "Supply Raid")
 	void SetInProgress(const bool bNewValue);
@@ -75,11 +75,10 @@ protected:
 	virtual void OnGameTimerUpdate();
 
 private:
-	UFUNCTION(Client, Reliable, Category = "Supply Raid")
-	void Client_SetRemainingTime(const int32 Time);
+	UFUNCTION(NetMulticast, Reliable, Category = "Supply Raid")
+	void NetMulticast_SetRemainingTime(const int32 Time);
+	void NetMulticast_SetRemainingTime_Implementation(const int32 Time);
 
-	UFUNCTION()
-	void Client_SetRemainingTime_Implementation(const int32 Time);
 
 	UFUNCTION()
 	void TestTeamLeadership();

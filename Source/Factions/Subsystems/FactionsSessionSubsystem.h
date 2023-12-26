@@ -7,8 +7,12 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Factions/PlayerStates/MasterPlayerState.h"
 #include "Factions/Interfaces/FactionsEntityInterface.h"
+#include "GameFramework/OnlineReplStructs.h"
 
 #include "FactionsSessionSubsystem.generated.h"
+
+// Forward declarations
+class AMasterPlayerController;
 
 DECLARE_LOG_CATEGORY_EXTERN(FactionsSessionLog, Log, All);
 
@@ -20,6 +24,18 @@ enum class ETeamComparisonResult : uint8
 	Equal		UMETA(DisplayName = "EQUAL"),
 	Different	UMETA(DisplayName = "DIFFERENT"),
 	Invalid		UMETA(DisplayName = "INVALID")
+};
+
+USTRUCT(BlueprintType)
+struct FSessionPlayerData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Session Player")
+	FUniqueNetIdRepl PlayerNetId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Session Player")
+	EFactionsTeam Team;
 };
 
 /**
@@ -53,6 +69,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Factions Session")
 	EFactionsTeam GetEntityTeam(AActor* Entity);
 
+	UFUNCTION(BlueprintCallable, Category = "Factions Session")
+	void RegisterPlayersInSession();
+
+	UFUNCTION(BlueprintCallable, Category = "Factions Session")
+	bool GetSessionPlayerData(AMasterPlayerState* Player, FSessionPlayerData& SessionPlayerData);
+
 	/**
 	* Player states currently on the session
 	*/
@@ -70,4 +92,10 @@ public:
 	*/
 	UPROPERTY(BlueprintAssignable, Category = "Factions Session")
 	FOnPlayerUpdateDelegate OnPlayerRemoved;
+
+	/**
+	* Array with data for all the player in the session
+	*/
+	UPROPERTY(BlueprintReadOnly, Category = "Factions Session")
+	TArray<FSessionPlayerData> SessionPlayersData;
 };
