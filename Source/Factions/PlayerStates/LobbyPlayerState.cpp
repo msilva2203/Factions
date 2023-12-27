@@ -3,3 +3,7 @@
 
 #include "Factions/PlayerStates/LobbyPlayerState.h"
 
+ALobbyPlayerState::ALobbyPlayerState() :
+	Super()
+{
+}

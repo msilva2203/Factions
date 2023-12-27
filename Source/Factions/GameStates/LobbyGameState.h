@@ -9,8 +9,6 @@
 
 #include "LobbyGameState.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLobbyGameModeUpdatedDelegate, EFactionsGameMode, GameMode);
-
 /**
  * 
  */
@@ -20,6 +18,10 @@ class FACTIONS_API ALobbyGameState : public AMasterGameState
 	GENERATED_BODY()
 	
 public:
+	ALobbyGameState();
+
+	virtual void BeginPlay() override;
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION(BlueprintCallable, Category = "Lobby Game State")
@@ -27,9 +29,6 @@ public:
 
 	UPROPERTY(ReplicatedUsing = OnRep_LobbyGameMode, BlueprintReadOnly, Category = "Lobby Game State")
 	EFactionsGameMode LobbyGameMode;
-
-	UPROPERTY(BlueprintAssignable, Category = "Lobby Game State")
-	FOnLobbyGameModeUpdatedDelegate OnLobbyGameModeUpdated;
 
 protected:
 	UFUNCTION()

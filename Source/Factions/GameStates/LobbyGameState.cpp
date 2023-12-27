@@ -5,6 +5,18 @@
 
 #include "net/UnrealNetwork.h"
 
+ALobbyGameState::ALobbyGameState()
+{
+	NetDormancy = ENetDormancy::DORM_DormantAll;
+	NetUpdateFrequency = 0.0f;
+}
+
+void ALobbyGameState::BeginPlay()
+{
+	Super::BeginPlay();
+
+}
+
 void ALobbyGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -17,12 +29,19 @@ void ALobbyGameState::ChangeGameMode(const EFactionsGameMode NewGameMode)
 {
 	if (GetNetMode() < NM_Client)
 	{
-		LobbyGameMode = NewGameMode;
-		OnRep_LobbyGameMode();
+		if (LobbyGameMode != NewGameMode)
+		{
+			LobbyGameMode = NewGameMode;
+			OnRep_LobbyGameMode();
+			ForceNetUpdate();
+		}
 	}
 }
 
 void ALobbyGameState::OnRep_LobbyGameMode()
 {
-	OnLobbyGameModeUpdated.Broadcast(LobbyGameMode);
+	if (FactionsSessionSubsystem)
+	{
+		FactionsSessionSubsystem->SetSessionGameMode(LobbyGameMode);
+	}
 }

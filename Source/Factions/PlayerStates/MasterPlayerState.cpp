@@ -9,7 +9,8 @@
 AMasterPlayerState::AMasterPlayerState() :
 	bArrived(false)
 {
-	NetUpdateFrequency = 100.0f;
+	NetDormancy = ENetDormancy::DORM_DormantAll;
+	NetUpdateFrequency = 0.0f;
 }
 
 void AMasterPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -59,8 +60,12 @@ void AMasterPlayerState::SetPlayerTeam(const EFactionsTeam NewTeam)
 {
 	if (GetNetMode() < NM_Client)
 	{
-		PlayerTeam = NewTeam;
-		OnRep_PlayerTeam();
+		if (PlayerTeam != NewTeam)
+		{
+			PlayerTeam = NewTeam;
+			OnRep_PlayerTeam();
+			ForceNetUpdate();
+		}
 	}
 }
 

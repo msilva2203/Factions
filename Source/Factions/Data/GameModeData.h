@@ -15,6 +15,7 @@
 UENUM(BlueprintType)
 enum class EFactionsGameMode : uint8
 {
+	None			UMETA(DisplayName = "NONE"),
 	SupplyRaid		UMETA(DisplayName = "SUPPLY_RAID"),
 	Survivors		UMETA(DisplayName = "SURVIVORS"),
 	Interrogation	UMETA(DisplayName = "INTERROGATION")
@@ -30,6 +31,9 @@ struct FFactionsGameModeData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Mode")
 	EFactionsGameMode GameMode;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Mode")
+	FString Alias;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Mode")
 	FText Name;

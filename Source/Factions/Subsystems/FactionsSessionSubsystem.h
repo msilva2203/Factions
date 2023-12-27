@@ -8,6 +8,7 @@
 #include "Factions/PlayerStates/MasterPlayerState.h"
 #include "Factions/Interfaces/FactionsEntityInterface.h"
 #include "GameFramework/OnlineReplStructs.h"
+#include "Factions/Data/GameModeData.h"
 
 #include "FactionsSessionSubsystem.generated.h"
 
@@ -17,6 +18,7 @@ class AMasterPlayerController;
 DECLARE_LOG_CATEGORY_EXTERN(FactionsSessionLog, Log, All);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerUpdateDelegate, AMasterPlayerState*, PlayerState);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSessionGameModeUpdatedDelegate, EFactionsGameMode, GameMode);
 
 UENUM(BlueprintType)
 enum class ETeamComparisonResult : uint8
@@ -75,6 +77,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Factions Session")
 	bool GetSessionPlayerData(AMasterPlayerState* Player, FSessionPlayerData& SessionPlayerData);
 
+	UFUNCTION(BlueprintCallable, Category = "Factions Session")
+	void SetSessionGameMode(const EFactionsGameMode NewGameMode);
+
+	UFUNCTION(BlueprintCallable, Category = "Factions Session")
+	void DamageEntity(AActor* Entity, float Damage);
+
 	/**
 	* Player states currently on the session
 	*/
@@ -93,9 +101,15 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Factions Session")
 	FOnPlayerUpdateDelegate OnPlayerRemoved;
 
+	UPROPERTY(BlueprintAssignable, Category = "Factions Session")
+	FOnSessionGameModeUpdatedDelegate OnSessionGameModeUpdated;
+
 	/**
 	* Array with data for all the player in the session
 	*/
 	UPROPERTY(BlueprintReadOnly, Category = "Factions Session")
 	TArray<FSessionPlayerData> SessionPlayersData;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Factions Session")
+	EFactionsGameMode SessionGameMode;
 };

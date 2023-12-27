@@ -18,15 +18,14 @@ class FACTIONS_API AMasterPlayerController : public APlayerController, public IF
 	GENERATED_BODY()
 	
 public:
+	AMasterPlayerController();
+
 	virtual void BeginPlay() override;
 
 	virtual EFactionsTeam GetEntityTeam() override;
 
-	UFUNCTION(Client, Reliable, BlueprintCallable, Category = "Master Player Controller")
-	void Client_SetPlayerTeam(const EFactionsTeam NewTeam);
-	void Client_SetPlayerTeam_Implementation(const EFactionsTeam NewTeam);
-
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Master Player Controller")
 	void Server_SetPlayerTeam(const EFactionsTeam NewTeam);
 	void Server_SetPlayerTeam_Implementation(const EFactionsTeam NewTeam);
+	bool Server_SetPlayerTeam_Validate(const EFactionsTeam NewTeam);
 };

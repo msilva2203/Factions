@@ -31,6 +31,7 @@ void AMatchPlayerState::SetIsDead(const bool bNewValue)
 	{
 		bIsDead = bNewValue;
 		OnRep_IsDead();
+		ForceNetUpdate();
 	}
 }
 

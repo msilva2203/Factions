@@ -5,6 +5,7 @@
 
 #include "Factions/PlayerControllers/MasterPlayerController.h"
 #include "Factions/GameStates/MasterGameState.h"
+#include "Factions/Components/EntityAttributeComponent.h"
 
 DEFINE_LOG_CATEGORY(FactionsSessionLog);
 
@@ -93,4 +94,27 @@ bool UFactionsSessionSubsystem::GetSessionPlayerData(AMasterPlayerState* Player,
 		}
 	}
 	return false;
+}
+
+void UFactionsSessionSubsystem::SetSessionGameMode(const EFactionsGameMode NewGameMode)
+{
+	SessionGameMode = NewGameMode;
+	OnSessionGameModeUpdated.Broadcast(SessionGameMode);
+}
+
+void UFactionsSessionSubsystem::DamageEntity(AActor* Entity, float Damage)
+{
+	auto Comps = Entity->GetComponentsByClass(UEntityAttributeComponent::StaticClass());
+
+	for (auto Comp : Comps)
+	{
+		if (auto AttribComp = Cast<UEntityAttributeComponent>(Comp))
+		{
+			FName CompName = TEXT("Health");
+			if (AttribComp->AttributeName.IsEqual(CompName))
+			{
+				AttribComp->OffsetAttributeValue(Damage * -1.0f);
+			}
+		}
+	}
 }

@@ -21,6 +21,7 @@ void ALobbyGameMode::BeginPlay()
 	Super::BeginPlay();
 
 	LobbyGameState = Cast<ALobbyGameState>(GameState);
+	LobbyGameState->ChangeGameMode(FactionsSessionSubsystem->SessionGameMode);
 }
 
 void ALobbyGameMode::StartMatch()
