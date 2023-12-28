@@ -15,6 +15,8 @@ AMasterPlayerController::AMasterPlayerController()
 void AMasterPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	
 }
 
 EFactionsTeam AMasterPlayerController::GetEntityTeam()
@@ -36,4 +38,34 @@ bool AMasterPlayerController::Server_SetPlayerTeam_Validate(const EFactionsTeam 
 {
 	// Implement RPC validation
 	return true;
+}
+
+void AMasterPlayerController::player_set_fov(const float NewValue)
+{
+	SettingsSubsystem = GetLocalPlayer()->GetSubsystem<USettingsSubsystem>();
+	SettingsSubsystem->FOV = NewValue;
+}
+
+void AMasterPlayerController::player_set_sensitivity_x(const float NewValue)
+{
+	SettingsSubsystem = GetLocalPlayer()->GetSubsystem<USettingsSubsystem>();
+	SettingsSubsystem->SensitivityX = NewValue;
+}
+
+void AMasterPlayerController::player_set_sensitivity_y(const float NewValue)
+{
+	SettingsSubsystem = GetLocalPlayer()->GetSubsystem<USettingsSubsystem>();
+	SettingsSubsystem->SensitivityY = NewValue;
+}
+
+void AMasterPlayerController::player_set_sensitivity_aiming_x(const float NewValue)
+{
+	SettingsSubsystem = GetLocalPlayer()->GetSubsystem<USettingsSubsystem>();
+	SettingsSubsystem->SensitivityAimingX = NewValue;
+}
+
+void AMasterPlayerController::player_set_sensitivity_aiming_y(const float NewValue)
+{
+	SettingsSubsystem = GetLocalPlayer()->GetSubsystem<USettingsSubsystem>();
+	SettingsSubsystem->SensitivityAimingY = NewValue;
 }

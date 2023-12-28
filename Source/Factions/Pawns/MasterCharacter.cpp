@@ -6,15 +6,19 @@
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 #define MIN_SPRINTING_SPEED 50.0f
+#define SHOULDER_SWITCH_DELAY 0.5f
+#define MIN_SHOULDER_SWAP_SPED 25.0f
 
 
 // Sets default values
 AMasterCharacter::AMasterCharacter() :
 	CharacterState(ECharacterState::Default),
-	MovementState(EMovementState::Standing)
+	MovementState(EMovementState::Standing),
+	Shoulder(EShoulder::Right)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -67,6 +71,7 @@ void AMasterCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	// General begin play
+	auto LocalPlayer = GetWorld()->GetFirstPlayerController()->GetLocalPlayer();
 
 	// Caches a reference to the factions session subsytem
 	FactionsSessionSubsystem = GetGameInstance()->GetSubsystem<UFactionsSessionSubsystem>();
@@ -80,15 +85,19 @@ void AMasterCharacter::BeginPlay()
 	UpdateCharacterState(CharacterState, true);
 	UpdateMovementState(MovementState, true);
 
+	// Updates shoulder
+	UpdateShoulder(Shoulder);
+
+	// Caches a reference to the setting subsystem
+	SettingsSubsystem = LocalPlayer->GetSubsystem<USettingsSubsystem>();
 
 	if (IsLocallyControlled())
 	{
 		// Local player begin play
 
 		// Caches a reference to the radar subsytem
-		auto LocalPlayer = GetWorld()->GetFirstPlayerController()->GetLocalPlayer();
 		RadarSubsystem = LocalPlayer->GetSubsystem<URadarSubsystem>();
-
+		
 		RadarSubsystem->SetPhysicalRadius(1500.0f);
 	}
 	else
@@ -127,7 +136,6 @@ void AMasterCharacter::InputLookRight(float AxisValue)
 void AMasterCharacter::InputSprintPressed()
 {
 	InputData.bHoldingSprint = true;
-
 }
 
 void AMasterCharacter::InputSprintReleased()
@@ -175,18 +183,61 @@ void AMasterCharacter::InputFireReleased()
 	InputData.bHoldingFire = false;
 }
 
+void AMasterCharacter::InputSwitchShoulderPressed()
+{
+	InputData.bHoldingSwitchShoulder = true;
+
+	if (IsAiming() && !InputData.bBlockShoulderSwitch)
+	{
+		const EShoulder NewShoulder = (Shoulder == EShoulder::Right ? EShoulder::Left : EShoulder::Right);
+		SetShoulder(NewShoulder);
+
+		InputData.bBlockShoulderSwitch = true;
+		GetWorldTimerManager().SetTimer(ShoulderSwitchDelayHandle, this, &AMasterCharacter::InputCompleteShoulderSwitchDelay, SHOULDER_SWITCH_DELAY, false);
+	}
+}
+
+void AMasterCharacter::InputSwitchShoulderReleased()
+{
+	InputData.bHoldingSwitchShoulder = true;
+}
+
+void AMasterCharacter::InputCompleteShoulderSwitchDelay()
+{
+	InputData.bBlockShoulderSwitch = false;
+
+	if (GetWorldTimerManager().IsTimerActive(ShoulderSwitchDelayHandle))
+	{
+		GetWorldTimerManager().ClearTimer(ShoulderSwitchDelayHandle);
+	}
+}
+
+float AMasterCharacter::GetSensitivityX() const
+{
+	return (IsAiming() ? SettingsSubsystem->SensitivityAimingX : SettingsSubsystem->SensitivityX);
+}
+
+float AMasterCharacter::GetSensitivityY() const
+{
+	return (IsAiming() ? SettingsSubsystem->SensitivityAimingY : SettingsSubsystem->SensitivityY);
+}
+
 // Called every frame
 void AMasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 	// General tick
+	const bool bIsLocal = IsLocallyControlled();
 
 	// Handles both character and movement states
-	HandleCharacterState(DeltaTime, IsLocallyControlled());
-	HandleMovementState(DeltaTime, IsLocallyControlled());
+	HandleCharacterState(DeltaTime, bIsLocal);
+	HandleMovementState(DeltaTime, bIsLocal);
 
-	if (IsLocallyControlled())
+	// Handles camera updates
+	HandleCamera(DeltaTime, bIsLocal);
+
+	if (bIsLocal)
 	{
 		// Local player tick
 
@@ -233,6 +284,8 @@ void AMasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &AMasterCharacter::InputAimReleased);
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AMasterCharacter::InputFirePressed);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AMasterCharacter::InputFireReleased);
+	PlayerInputComponent->BindAction("SwitchShoulder", IE_Pressed, this, &AMasterCharacter::InputSwitchShoulderPressed);
+	PlayerInputComponent->BindAction("SwitchShoulder", IE_Released, this, &AMasterCharacter::InputSwitchShoulderReleased);
 }
 
 EFactionsTeam AMasterCharacter::GetEntityTeam()
@@ -381,6 +434,8 @@ bool AMasterCharacter::Server_SetShoulder_Validate(const EShoulder NewShoulder)
 
 void AMasterCharacter::UpdateCharacterState(const ECharacterState UpdatedCharacterState, const bool bState)
 {
+	const bool bIsLocal = IsLocallyControlled();
+
 	switch (UpdatedCharacterState)
 	{
 	case ECharacterState::Default:
@@ -389,10 +444,13 @@ void AMasterCharacter::UpdateCharacterState(const ECharacterState UpdatedCharact
 
 		if (bState)
 		{
+			UpdateMovementState(MovementState, true);
+
 			if (!IsSprinting() && InputData.bHoldingSprint)
 			{
 				SetMovementState(EMovementState::Sprinting);
 			}
+
 		}
 		else
 		{
@@ -410,6 +468,13 @@ void AMasterCharacter::UpdateCharacterState(const ECharacterState UpdatedCharact
 			if (IsSprinting())
 			{
 				SetMovementState(EMovementState::Standing);
+			}
+
+			CameraData = AimingCameraData->Data;
+
+			if (bIsLocal)
+			{
+				InputCompleteShoulderSwitchDelay();
 			}
 		}
 		else
@@ -459,7 +524,32 @@ void AMasterCharacter::UpdateCharacterState(const ECharacterState UpdatedCharact
 
 void AMasterCharacter::HandleCharacterState(float DeltaTime, const bool bIsLocal)
 {
+	const float MovingSpeed = GetVelocity().Length();
 
+	// Controls aiming input
+	if (bIsLocal)
+	{
+		if (InputData.bHoldingAim)
+		{
+			if (!IsAiming())
+			{
+				SetCharacterState(ECharacterState::Aiming);
+			}
+		}
+		else
+		{
+			if (IsAiming())
+			{
+				SetCharacterState(ECharacterState::Default);
+			}
+		}
+	}
+
+	// Resets shoulder to right shoulder if moving and not aiming
+	if (Shoulder != EShoulder::Right && !IsAiming() && MovingSpeed >= MIN_SHOULDER_SWAP_SPED)
+	{
+		SetShoulder(EShoulder::Right);
+	}
 }
 
 void AMasterCharacter::UpdateMovementState(const EMovementState UpdatedMovementState, const bool bState)
@@ -476,6 +566,11 @@ void AMasterCharacter::UpdateMovementState(const EMovementState UpdatedMovementS
 		{
 			MovementData = StandingMovementData->Data;
 			CharMovement->MaxWalkSpeed = MovementData.Speed;
+
+			if (!IsAiming())
+			{
+				CameraData = StandingCameraData->Data;
+			}
 		}
 		else
 		{
@@ -492,6 +587,11 @@ void AMasterCharacter::UpdateMovementState(const EMovementState UpdatedMovementS
 		{
 			MovementData = CrouchingMovementData->Data;
 			CharMovement->MaxWalkSpeed = MovementData.Speed;
+
+			if (!IsAiming())
+			{
+				CameraData = CrouchingCameraData->Data;
+			}
 		}
 		else
 		{
@@ -508,6 +608,8 @@ void AMasterCharacter::UpdateMovementState(const EMovementState UpdatedMovementS
 		{
 			MovementData = SprintingMovementData->Data;
 			CharMovement->MaxWalkSpeed = MovementData.Speed;
+
+			CameraData = SprintingCameraData->Data;
 		}
 		else
 		{
@@ -547,7 +649,7 @@ void AMasterCharacter::HandleMovementState(float DeltaTime, const bool bIsLocal)
 		// Sprinting input
 		if (InputData.bHoldingSprint)
 		{
-			if (!IsSprinting() && MovingSpeed > MIN_SPRINTING_SPEED && StaminaComponent->GetPercent() >= 0.25f)
+			if (!IsSprinting() && MovingSpeed > MIN_SPRINTING_SPEED && StaminaComponent->GetPercent() >= 0.25f && !IsAiming())
 			{
 				SetMovementState(EMovementState::Sprinting);
 			}
@@ -562,12 +664,29 @@ void AMasterCharacter::HandleMovementState(float DeltaTime, const bool bIsLocal)
 		
 		// Crouch input
 
+
+		// Camera input
+		AddControllerYawInput(InputData.LookRightValue * GetSensitivityX());
+		AddControllerPitchInput(InputData.LookUpValue * GetSensitivityY());
+		//...
+
+		// Movement input
+		FRotator InputRotation = GetControlRotation();
+		InputRotation.Roll = 0.0f;
+		InputRotation.Pitch = 0.0f;
+
+		const FVector ForwardInputDirection = UKismetMathLibrary::GetForwardVector(InputRotation);
+		const FVector RightInputDirection = UKismetMathLibrary::GetRightVector(InputRotation);
+
+		AddMovementInput(ForwardInputDirection, InputData.MoveForwardValue);
+		AddMovementInput(RightInputDirection, InputData.MoveRightValue);
+		//...
+
 	}
 	else
 	{
 		//...
 	}
-
 	
 }
 
@@ -575,6 +694,26 @@ void AMasterCharacter::UpdateShoulder(const EShoulder NewShoulder)
 {
 	// Notify blueprint classes
 	OnShoulderUpdated(NewShoulder);
+}
+
+void AMasterCharacter::HandleCamera(float DeltaTime, const bool bIsLocal)
+{
+	const float CurrentDistance = CameraArm->TargetArmLength;
+	const float CurrentFov = PlayerCamera->FieldOfView;
+	const float SettingsFov = SettingsSubsystem->FOV;
+	const float CurrentShoulderOffset = CameraArm->SocketOffset.Y;
+
+	const float ShoulderOffsetMultiplier = (float)(((int)(Shoulder)) - 1);
+	const float TargetShoulderOffset = CameraData.ShoulderOffset * ShoulderOffsetMultiplier;
+
+	float UpdatedDistance = FMath::FInterpTo<float>(CurrentDistance, CameraData.Distance, DeltaTime, CameraData.DistanceInterpSpeed);
+	float UpdatedFov = FMath::FInterpTo<float>(CurrentFov, SettingsFov + CameraData.FovOffset, DeltaTime, CameraData.FovOffsetInterpSped);
+	float UpdatedShoulderOffset = FMath::FInterpTo<float>(CurrentShoulderOffset, TargetShoulderOffset, DeltaTime, CameraData.ShoudlerOffsetInterpSpeed);
+
+	CameraArm->TargetArmLength = UpdatedDistance;
+	PlayerCamera->SetFieldOfView(UpdatedFov);
+	CameraArm->SocketOffset.Y = UpdatedShoulderOffset;
+
 }
 
 void AMasterCharacter::HealthUpdated(const float NewValue, const float Percent)

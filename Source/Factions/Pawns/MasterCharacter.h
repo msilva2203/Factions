@@ -13,6 +13,8 @@
 #include "Factions/Subsystems/FactionsSessionSubsystem.h"
 #include "Factions/Data/MovementData.h"
 #include "Factions/Components/EntityAttributeComponent.h"
+#include "Factions/Data/CameraData.h"
+#include "Factions/Subsystems/SettingsSubsystem.h"
 
 #include "MasterCharacter.generated.h"
 
@@ -70,18 +72,11 @@ struct FInputData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	bool bHoldingFire;
 
-};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	bool bHoldingSwitchShoulder;
 
-USTRUCT(BlueprintType)
-struct FCameraStateData
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
-	float Distance;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
-	float ShoulderOffset;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	bool bBlockShoulderSwitch;
 
 };
 
@@ -96,13 +91,13 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
-	UPROPERTY(EditAnywhere, Category = "Character")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
 	USpringArmComponent* CameraArm;
 
-	UPROPERTY(EditAnywhere, Category = "Character")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
 	UCameraComponent* PlayerCamera;
 
-	UPROPERTY(EditAnywhere, Category = "Character")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
 	URadarEntityComponent* RadarEntityComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
@@ -114,14 +109,34 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
 	UEntityAttributeComponent* ListeningStaminaComponent;
 
-	UPROPERTY(EditAnywhere, Category = "Character")
+	//
+	// Movement Data
+	//
+
+	UPROPERTY(EditAnywhere, Category = "Character Movement")
 	UMovementData* StandingMovementData;
 
-	UPROPERTY(EditAnywhere, Category = "Character")
+	UPROPERTY(EditAnywhere, Category = "Character Movement")
 	UMovementData* CrouchingMovementData;
 
-	UPROPERTY(EditAnywhere, Category = "Character")
+	UPROPERTY(EditAnywhere, Category = "Character Movement")
 	UMovementData* SprintingMovementData;
+
+	//
+	// Camera Data
+	//
+
+	UPROPERTY(EditAnywhere, Category = "Character Camera")
+	UCameraData* StandingCameraData;
+
+	UPROPERTY(EditAnywhere, Category = "Character Camera")
+	UCameraData* CrouchingCameraData;
+
+	UPROPERTY(EditAnywhere, Category = "Character Camera")
+	UCameraData* SprintingCameraData;
+
+	UPROPERTY(EditAnywhere, Category = "Character Camera")
+	UCameraData* AimingCameraData;
 
 protected:
 	// Called when the game starts or when spawned
@@ -163,11 +178,36 @@ protected:
 	UFUNCTION()
 	virtual void InputFireReleased();
 
+	UFUNCTION()
+	virtual void InputSwitchShoulderPressed();
+
+	UFUNCTION()
+	virtual void InputSwitchShoulderReleased();
+
+	UFUNCTION()
+	void InputCompleteShoulderSwitchDelay();
+
+	UFUNCTION(BlueprintPure, Category = "Character")
+	float GetSensitivityX() const;
+
+	UFUNCTION(BlueprintPure, Category = "Character")
+	float GetSensitivityY() const;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Character")
 	URadarSubsystem* RadarSubsystem;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Character")
 	UFactionsSessionSubsystem* FactionsSessionSubsystem;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Character")
+	USettingsSubsystem* SettingsSubsystem;
+
+	//
+	// Timers
+	//
+
+	UPROPERTY()
+	FTimerHandle ShoulderSwitchDelayHandle;
 
 public:	
 	// Called every frame
@@ -241,6 +281,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Character")
 	FFactionsMovementData MovementData;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Character")
+	FFactionsCameraData CameraData;
+
 private:
 	UFUNCTION(Server, Unreliable)
 	void Server_SetCharacterState(const ECharacterState NewCharacterState);
@@ -271,6 +314,9 @@ private:
 
 	UFUNCTION()
 	void UpdateShoulder(const EShoulder NewShoulder);
+
+	UFUNCTION()
+	void HandleCamera(float DeltaTime, const bool bIsLocal);
 
 	UFUNCTION()
 	void HealthUpdated(const float NewValue, const float Percent);
