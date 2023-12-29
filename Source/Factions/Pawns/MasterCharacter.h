@@ -15,6 +15,7 @@
 #include "Factions/Components/EntityAttributeComponent.h"
 #include "Factions/Data/CameraData.h"
 #include "Factions/Subsystems/SettingsSubsystem.h"
+#include "Factions/Components/InventoryComponent.h"
 
 #include "MasterCharacter.generated.h"
 
@@ -78,6 +79,9 @@ struct FInputData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	bool bBlockShoulderSwitch;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	bool bIsHotBarVisible;
+
 };
 
 UCLASS()
@@ -108,6 +112,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
 	UEntityAttributeComponent* ListeningStaminaComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
+	UInventoryComponent* InventoryComponent;
 
 	//
 	// Movement Data
@@ -185,7 +192,25 @@ protected:
 	virtual void InputSwitchShoulderReleased();
 
 	UFUNCTION()
+	virtual void InputSelectRightPressed();
+
+	UFUNCTION()
+	virtual void InputSelectLeftPressed();
+
+	UFUNCTION()
+	virtual void InputSelectUpPressed();
+
+	UFUNCTION()
+	virtual void InputSelectDownPressed();
+
+	UFUNCTION()
 	void InputCompleteShoulderSwitchDelay();
+
+	UFUNCTION()
+	void InputDisplayHotBar();
+
+	UFUNCTION()
+	void InputHideHotBar();
 
 	UFUNCTION(BlueprintPure, Category = "Character")
 	float GetSensitivityX() const;
@@ -208,6 +233,9 @@ protected:
 
 	UPROPERTY()
 	FTimerHandle ShoulderSwitchDelayHandle;
+
+	UPROPERTY()
+	FTimerHandle HotBarVisibilityTimeHandle;
 
 public:	
 	// Called every frame

@@ -12,6 +12,7 @@
 #define MIN_SPRINTING_SPEED 50.0f
 #define SHOULDER_SWITCH_DELAY 0.5f
 #define MIN_SHOULDER_SWAP_SPED 25.0f
+#define HOTBAR_VISIBILITY_TIME 2.0f
 
 
 // Sets default values
@@ -52,6 +53,10 @@ AMasterCharacter::AMasterCharacter() :
 	// Listening stamina component
 	ListeningStaminaComponent = CreateDefaultSubobject<UEntityAttributeComponent>(TEXT("Listening Stamina Attribute"));
 	ListeningStaminaComponent->SetIsReplicated(false);
+
+	// Inventory component
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
+	InventoryComponent->SetIsReplicated(true);
 
 }
 
@@ -202,6 +207,54 @@ void AMasterCharacter::InputSwitchShoulderReleased()
 	InputData.bHoldingSwitchShoulder = true;
 }
 
+void AMasterCharacter::InputSelectRightPressed()
+{
+	if (InputData.bIsHotBarVisible)
+	{
+
+	}
+
+	InputDisplayHotBar();
+}
+
+void AMasterCharacter::InputSelectLeftPressed()
+{
+	if (InputData.bIsHotBarVisible)
+	{
+
+	}
+
+	InputDisplayHotBar();
+}
+
+void AMasterCharacter::InputSelectUpPressed()
+{
+	if (InputData.bIsHotBarVisible)
+	{
+		InventoryComponent->OffsetVerticalSelection(-1);
+	}
+	else
+	{
+		InventoryComponent->SetSelection(6);
+	}
+
+	InputDisplayHotBar();
+}
+
+void AMasterCharacter::InputSelectDownPressed()
+{
+	if (InputData.bIsHotBarVisible)
+	{
+		InventoryComponent->OffsetVerticalSelection(1);
+	}
+	else
+	{
+		InventoryComponent->SetSelection(7);
+	}
+
+	InputDisplayHotBar();
+}
+
 void AMasterCharacter::InputCompleteShoulderSwitchDelay()
 {
 	InputData.bBlockShoulderSwitch = false;
@@ -210,6 +263,17 @@ void AMasterCharacter::InputCompleteShoulderSwitchDelay()
 	{
 		GetWorldTimerManager().ClearTimer(ShoulderSwitchDelayHandle);
 	}
+}
+
+void AMasterCharacter::InputDisplayHotBar()
+{
+	InputData.bIsHotBarVisible = true;
+	GetWorldTimerManager().SetTimer(HotBarVisibilityTimeHandle, this, &AMasterCharacter::InputHideHotBar, HOTBAR_VISIBILITY_TIME, false);
+}
+
+void AMasterCharacter::InputHideHotBar()
+{
+	InputData.bIsHotBarVisible = false;
 }
 
 float AMasterCharacter::GetSensitivityX() const
@@ -286,6 +350,10 @@ void AMasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AMasterCharacter::InputFireReleased);
 	PlayerInputComponent->BindAction("SwitchShoulder", IE_Pressed, this, &AMasterCharacter::InputSwitchShoulderPressed);
 	PlayerInputComponent->BindAction("SwitchShoulder", IE_Released, this, &AMasterCharacter::InputSwitchShoulderReleased);
+	PlayerInputComponent->BindAction("SelectRight", IE_Pressed, this, &AMasterCharacter::InputSelectRightPressed);
+	PlayerInputComponent->BindAction("SelectLeft", IE_Pressed, this, &AMasterCharacter::InputSelectLeftPressed);
+	PlayerInputComponent->BindAction("SelectUp", IE_Pressed, this, &AMasterCharacter::InputSelectUpPressed);
+	PlayerInputComponent->BindAction("SelectDown", IE_Pressed, this, &AMasterCharacter::InputSelectDownPressed);
 }
 
 EFactionsTeam AMasterCharacter::GetEntityTeam()
