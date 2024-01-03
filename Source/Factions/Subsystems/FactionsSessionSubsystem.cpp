@@ -104,7 +104,8 @@ void UFactionsSessionSubsystem::SetSessionGameMode(const EFactionsGameMode NewGa
 
 void UFactionsSessionSubsystem::DamageEntity(AActor* Entity, float Damage)
 {
-	auto Comps = Entity->GetComponentsByClass(UEntityAttributeComponent::StaticClass());
+	TArray<UActorComponent*> Comps;
+	Entity->GetComponents(UEntityAttributeComponent::StaticClass(), Comps);
 
 	for (auto Comp : Comps)
 	{

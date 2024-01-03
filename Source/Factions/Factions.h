@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Factions/Data/MapData.h"
 
 #include "Factions.generated.h"
