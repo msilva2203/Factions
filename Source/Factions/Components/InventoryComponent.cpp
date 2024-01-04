@@ -2,7 +2,6 @@
 
 
 #include "Factions/Components/InventoryComponent.h"
-
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/Character.h"
 
@@ -11,6 +10,7 @@
 #define SLOT_HEALTH_KIT	6
 #define SLOT_FIRE_BOMB 7
 #define SLOT_SUPPORT_BOMB 8
+#define SLOT_WEAPON 2
 
 
 // Sets default values for this component's properties
@@ -18,7 +18,7 @@ UInventoryComponent::UInventoryComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	// ...
 }
@@ -33,7 +33,7 @@ void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(UInventoryComponent, ExplosiveBomb);
 	DOREPLIFETIME(UInventoryComponent, FireBomb);
 	DOREPLIFETIME(UInventoryComponent, SupportBomb);
-
+	DOREPLIFETIME(UInventoryComponent, SelectedWeapon)
 }
 
 
@@ -51,6 +51,7 @@ void UInventoryComponent::BeginPlay()
 // Called every frame
 void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
+	// bCanEverTick is set to false.
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
@@ -165,6 +166,10 @@ void UInventoryComponent::OnRep_FireBomb()
 }
 
 void UInventoryComponent::OnRep_SupportBomb()
+{
+}
+
+void UInventoryComponent::OnRep_SelectedWeapon()
 {
 }
 

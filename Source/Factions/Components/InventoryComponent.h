@@ -63,11 +63,21 @@ public:
 	ABaseEquipment* ExplosiveBomb;;
 
 	UPROPERTY(ReplicatedUsing = "OnRep_FireBomb", BlueprintReadOnly, Category = "Inventory")
-	ABaseEquipment* FireBomb;;
+	ABaseEquipment* FireBomb;
 
 	UPROPERTY(ReplicatedUsing = "OnRep_SupportBomb", BlueprintReadOnly, Category = "Inventory")
 	ABaseEquipment* SupportBomb;
 
+	/** Weapon equipment **/
+	// TODO: Replace TArray<AActor*> with TArray<AWeapon*>
+	UPROPERTY(BlueprintReadOnly, Category = "Weapon Inventory")
+	TArray<AActor*> Weapon;
+
+	// TODO: SelectedWeapon should be a AWeapon* and not AActor*
+	UPROPERTY(ReplicatedUsing = "OnRep_SelectedWeapon", BlueprintReadOnly, Category = "Weapon Inventory")
+	AActor* SelectedWeapon;
+	/** Weapon equipment **/
+	
 	UPROPERTY(BlueprintAssignable, Category = "Inventory");
 	FOnSelectionUpdatedDelegate OnSelectionUpdated;
 
@@ -86,6 +96,9 @@ protected:
 
 	UFUNCTION()
 	virtual void OnRep_SupportBomb();
+
+	UFUNCTION()
+	virtual void OnRep_SelectedWeapon();
 
 	UFUNCTION(Server, Unreliable)
 	void Server_SetSelection(const int32 NewValue);
