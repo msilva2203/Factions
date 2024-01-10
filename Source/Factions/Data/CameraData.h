@@ -31,6 +31,9 @@ struct FFactionsCameraData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
 	float ShoudlerOffsetInterpSpeed;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+	float FollowSpeed;
+
 };
 
 /**

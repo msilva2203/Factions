@@ -8,6 +8,8 @@ ABaseEquipment::ABaseEquipment()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	bAlwaysRelevant = true;
 	bReplicates = true;
 }
 
@@ -25,6 +27,12 @@ void ABaseEquipment::Tick(float DeltaTime)
 
 }
 
+bool ABaseEquipment::IsLocalInstance()
+{
+	auto LocalPlayer = GetWorld()->GetFirstPlayerController();
+	return LocalPlayer == GetNetOwner();
+}
+
 void ABaseEquipment::Equip()
 {
 	if (GetOwner() == GetWorld()->GetFirstPlayerController())
@@ -38,7 +46,15 @@ void ABaseEquipment::Equip()
 void ABaseEquipment::Unequip()
 {
 	DisableInput(GetWorld()->GetFirstPlayerController());
+	SetPrimaryAction(false);
 
 	OnUnequipped();
 }
 
+void ABaseEquipment::SetPrimaryAction(const bool bNewValue)
+{
+}
+
+void ABaseEquipment::SetSecondaryAction(const bool bNewValue)
+{
+}

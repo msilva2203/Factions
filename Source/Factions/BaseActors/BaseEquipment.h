@@ -31,10 +31,26 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Equipment")
 	void OnUnequipped();
 
+	UFUNCTION(BlueprintPure, Category = "Equipment")
+	bool IsLocalInstance();
+
 	UFUNCTION()
 	virtual void Equip();
 
 	UFUNCTION()
 	virtual void Unequip();
 
+	/*
+	* Equivalent to pressing or releasing R2/R1
+	* Examples: shoot, reload, use medkit, etc...
+	*/
+	UFUNCTION()
+	virtual void SetPrimaryAction(const bool bNewValue);
+
+	/*
+	* Equivalent to pressing or releasing L2/R1
+	* Examples: aim, etc...
+	*/
+	UFUNCTION()
+	virtual void SetSecondaryAction(const bool bNewValue);
 };

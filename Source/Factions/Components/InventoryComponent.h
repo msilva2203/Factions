@@ -50,8 +50,14 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Inventory")
 	ABaseEquipment* GetSelectionEquipment(const int32 Value);
 
+	UFUNCTION(BlueprintPure, Category = "Inventory")
+	ABaseEquipment* GetCurrentEquipment();
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
 	FInventoryVerticalEquipment VerticalEquipmentData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
+	FInventoryHorizontalEquipment HorizontalEquipmentData;
 
 	UPROPERTY(ReplicatedUsing = "OnRep_Selection", BlueprintReadOnly, Category = "Inventory")
 	int32 Selection;
@@ -68,15 +74,11 @@ public:
 	UPROPERTY(ReplicatedUsing = "OnRep_SupportBomb", BlueprintReadOnly, Category = "Inventory")
 	ABaseEquipment* SupportBomb;
 
-	/** Weapon equipment **/
-	// TODO: Replace TArray<AActor*> with TArray<AWeapon*>
-	UPROPERTY(BlueprintReadOnly, Category = "Weapon Inventory")
-	TArray<AActor*> Weapon;
+	UPROPERTY(ReplicatedUsing = "OnRep_ShortWeapon", BlueprintReadOnly, Category = "Inventory")
+	ABaseEquipment* ShortWeapon;
 
-	// TODO: SelectedWeapon should be a AWeapon* and not AActor*
-	UPROPERTY(ReplicatedUsing = "OnRep_SelectedWeapon", BlueprintReadOnly, Category = "Weapon Inventory")
-	AActor* SelectedWeapon;
-	/** Weapon equipment **/
+	UPROPERTY(ReplicatedUsing = "OnRep_LargeWeapon", BlueprintReadOnly, Category = "Inventory")
+	ABaseEquipment* LargeWeapon;
 	
 	UPROPERTY(BlueprintAssignable, Category = "Inventory");
 	FOnSelectionUpdatedDelegate OnSelectionUpdated;
@@ -98,9 +100,12 @@ protected:
 	virtual void OnRep_SupportBomb();
 
 	UFUNCTION()
-	virtual void OnRep_SelectedWeapon();
+	virtual void OnRep_ShortWeapon();
 
-	UFUNCTION(Server, Unreliable)
+	UFUNCTION()
+	virtual void OnRep_LargeWeapon();
+
+	UFUNCTION(Server, Unreliable, WithValidation)
 	void Server_SetSelection(const int32 NewValue);
 	void Server_SetSelection_Implementation(const int32 NewValue);
 	bool Server_SetSelection_Validate(const int32 NewValue);

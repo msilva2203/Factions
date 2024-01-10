@@ -5,6 +5,13 @@
 
 #include "Net/UnrealNetwork.h"
 
+AMatchPlayerState::AMatchPlayerState()
+{
+	// Inventory component
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
+	InventoryComponent->SetIsReplicated(true);
+}
+
 void AMatchPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -17,6 +24,10 @@ void AMatchPlayerState::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (GetNetMode() <= NM_ListenServer)
+	{
+		InventoryComponent->SetupInventory();
+	}
 }
 
 void AMatchPlayerState::EndPlay(const EEndPlayReason::Type EndPlayReason)

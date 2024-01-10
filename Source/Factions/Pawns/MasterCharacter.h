@@ -95,6 +95,10 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
+	//
+	// Components
+	//
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
 	USpringArmComponent* CameraArm;
 
@@ -113,7 +117,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
 	UEntityAttributeComponent* ListeningStaminaComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
+	UPROPERTY(BlueprintReadOnly, Category = "Character")
 	UInventoryComponent* InventoryComponent;
 
 	//
@@ -145,9 +149,26 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Character Camera")
 	UCameraData* AimingCameraData;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Character Camera")
+	float FreeCameraInterpSpeed;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Character Camera")
+	float BlockedCameraInterpSpeed;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Character")
+	void OnSetupPlayerCharacter();
+
+	UFUNCTION()
+	virtual void SetupPlayerCharacter();
+
+	UFUNCTION()
+	virtual void OnInventorySelectionUpdated(const int32 NewValue);
+
+	virtual void OnRep_PlayerState() override;
 
 	UFUNCTION()
 	virtual void InputMoveForward(float AxisValue);
@@ -313,17 +334,17 @@ public:
 	FFactionsCameraData CameraData;
 
 private:
-	UFUNCTION(Server, Unreliable)
+	UFUNCTION(Server, Unreliable, WithValidation)
 	void Server_SetCharacterState(const ECharacterState NewCharacterState);
 	void Server_SetCharacterState_Implementation(const ECharacterState NewCharacterState);
 	bool Server_SetCharacterState_Validate(const ECharacterState NewCharacterState);
 
-	UFUNCTION(Server, Unreliable)
+	UFUNCTION(Server, Unreliable, WithValidation)
 	void Server_SetMovementState(const EMovementState NewMovementState);
 	void Server_SetMovementState_Implementation(const EMovementState NewMovementState);
 	bool Server_SetMovementState_Validate(const EMovementState NewMovementState);
 
-	UFUNCTION(Server, Unreliable)
+	UFUNCTION(Server, Unreliable, WithValidation)
 	void Server_SetShoulder(const EShoulder NewShoulder);
 	void Server_SetShoulder_Implementation(const EShoulder NewShoulder);
 	bool Server_SetShoulder_Validate(const EShoulder NewShoulder);

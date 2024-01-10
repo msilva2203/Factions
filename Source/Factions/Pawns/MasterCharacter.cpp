@@ -7,16 +7,24 @@
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Factions/PlayerStates/MatchPlayerState.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 
 #define MIN_SPRINTING_SPEED 50.0f
 #define SHOULDER_SWITCH_DELAY 0.5f
 #define MIN_SHOULDER_SWAP_SPED 25.0f
 #define HOTBAR_VISIBILITY_TIME 2.0f
+#define CAMERA_HEIGHT 70.0f
+
+#define CAMERA_INTERP_SPEED_FREE 5.0f
+#define CAMERA_INTERP_SPEED_BLOCKED 50.0f
 
 
 // Sets default values
 AMasterCharacter::AMasterCharacter() :
+	FreeCameraInterpSpeed(CAMERA_INTERP_SPEED_FREE),
+	BlockedCameraInterpSpeed(CAMERA_INTERP_SPEED_BLOCKED),
 	CharacterState(ECharacterState::Default),
 	MovementState(EMovementState::Standing),
 	Shoulder(EShoulder::Right)
@@ -31,9 +39,10 @@ AMasterCharacter::AMasterCharacter() :
 	// Spring Arm
 	CameraArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("Camera Arm Component"));
 	CameraArm->SetupAttachment(RootComponent);
-	CameraArm->SetRelativeLocation(FVector(0.0f, 0.0f, 50.0f));
+	CameraArm->SetRelativeLocation(FVector(0.0f, 0.0f, CAMERA_HEIGHT));
 	CameraArm->bUsePawnControlRotation = true;
 	CameraArm->TargetArmLength = 180.0f;
+	CameraArm->SetAbsolute(false, false, false);
 
 	// Camera
 	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Player Camera Component"));
@@ -54,9 +63,13 @@ AMasterCharacter::AMasterCharacter() :
 	ListeningStaminaComponent = CreateDefaultSubobject<UEntityAttributeComponent>(TEXT("Listening Stamina Attribute"));
 	ListeningStaminaComponent->SetIsReplicated(false);
 
-	// Inventory component
-	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
-	InventoryComponent->SetIsReplicated(true);
+	//** Inventory component changed to player state **//
+	
+	//// Inventory component
+	//InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
+	//InventoryComponent->SetIsReplicated(true);
+
+	//**//
 
 }
 
@@ -75,7 +88,7 @@ void AMasterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// General begin play
+	//** General begin play **//
 	auto LocalPlayer = GetWorld()->GetFirstPlayerController()->GetLocalPlayer();
 
 	// Caches a reference to the factions session subsytem
@@ -98,24 +111,78 @@ void AMasterCharacter::BeginPlay()
 
 	if (IsLocallyControlled())
 	{
-		// Local player begin play
+		//** Local player begin play **//
 
 		// Caches a reference to the radar subsytem
 		RadarSubsystem = LocalPlayer->GetSubsystem<URadarSubsystem>();
-		
+
 		RadarSubsystem->SetPhysicalRadius(1500.0f);
 	}
 	else
 	{
-		// Not local begin play
+		//** Not local begin play **//
 
 		RadarEntityComponent->PushEntity();
 	}
 
-	// Authority begin play
+	//** Authority begin play **//
 	if (HasAuthority())
 	{
+		SetupPlayerCharacter();
+
 	}
+}
+
+void AMasterCharacter::SetupPlayerCharacter()
+{
+	bool bIsLocal = IsLocallyControlled();
+
+	//** General Player Character Setup **//
+
+	// Gets a reference to the player state's inventory
+	if (auto PS = Cast<AMatchPlayerState>(GetPlayerState()))
+	{
+		InventoryComponent = PS->InventoryComponent;
+		InventoryComponent->OnSelectionUpdated.AddDynamic(this, &AMasterCharacter::OnInventorySelectionUpdated);
+	}
+
+	if (bIsLocal)
+	{
+		//** Local Player Character Setup **//
+
+
+	}
+	else
+	{
+		//** Not Local Player Character Setup **//
+
+
+	}
+
+	if (HasAuthority())
+	{
+		//** Authority Player Character Setup
+
+
+	}
+
+	// Notify blueprint classes
+	OnSetupPlayerCharacter();
+}
+
+void AMasterCharacter::OnInventorySelectionUpdated(const int32 NewValue)
+{
+	if (IsLocallyControlled())
+	{
+		InventoryComponent->GetSelectionEquipment(NewValue)->SetSecondaryAction(IsAiming());
+	}
+}
+
+void AMasterCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	SetupPlayerCharacter();
 }
 
 void AMasterCharacter::InputMoveForward(float AxisValue)
@@ -171,21 +238,53 @@ void AMasterCharacter::InputCrouchReleased()
 void AMasterCharacter::InputAimPressed()
 {
 	InputData.bHoldingAim = true;
+
+	if (InventoryComponent)
+	{
+		if (auto Equipment = InventoryComponent->GetCurrentEquipment())
+		{
+			Equipment->SetSecondaryAction(true);
+		}
+	}
 }
 
 void AMasterCharacter::InputAimReleased()
 {
 	InputData.bHoldingAim = false;
+
+	if (InventoryComponent)
+	{
+		if (auto Equipment = InventoryComponent->GetCurrentEquipment())
+		{
+			Equipment->SetSecondaryAction(false);
+		}
+	}
 }
 
 void AMasterCharacter::InputFirePressed()
 {
 	InputData.bHoldingFire = true;
+
+	if (InventoryComponent)
+	{
+		if (auto Equipment = InventoryComponent->GetCurrentEquipment())
+		{
+			Equipment->SetPrimaryAction(true);
+		}
+	}
 }
 
 void AMasterCharacter::InputFireReleased()
 {
 	InputData.bHoldingFire = false;
+
+	if (InventoryComponent)
+	{
+		if (auto Equipment = InventoryComponent->GetCurrentEquipment())
+		{
+			Equipment->SetPrimaryAction(false);
+		}
+	}
 }
 
 void AMasterCharacter::InputSwitchShoulderPressed()
@@ -211,7 +310,11 @@ void AMasterCharacter::InputSelectRightPressed()
 {
 	if (InputData.bIsHotBarVisible)
 	{
-
+		InventoryComponent->OffsetHorizontalSelection(1);
+	}
+	else
+	{
+		InventoryComponent->SetSelection(2);
 	}
 
 	InputDisplayHotBar();
@@ -221,7 +324,11 @@ void AMasterCharacter::InputSelectLeftPressed()
 {
 	if (InputData.bIsHotBarVisible)
 	{
-
+		InventoryComponent->OffsetHorizontalSelection(-1);
+	}
+	else
+	{
+		InventoryComponent->SetSelection(1);
 	}
 
 	InputDisplayHotBar();
@@ -291,7 +398,7 @@ void AMasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// General tick
+	//** General tick **//
 	const bool bIsLocal = IsLocallyControlled();
 
 	// Handles both character and movement states
@@ -303,7 +410,7 @@ void AMasterCharacter::Tick(float DeltaTime)
 
 	if (bIsLocal)
 	{
-		// Local player tick
+		//** Local player tick **//
 
 		// Updates radar center transform
 		FRadarTransform CenterTransform;
@@ -317,7 +424,7 @@ void AMasterCharacter::Tick(float DeltaTime)
 	}
 	else
 	{
-		// Not local tick
+		//** Not local tick **//
 
 		// Updates radar entity icon transform 
 		FRadarTransform RadarIconTransform;
@@ -333,13 +440,13 @@ void AMasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	// Bind axis input events
+	//** Bind axis input events **//
 	PlayerInputComponent->BindAxis("MoveForward", this, &AMasterCharacter::InputMoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AMasterCharacter::InputMoveRight);
 	PlayerInputComponent->BindAxis("LookUp", this, &AMasterCharacter::InputLookUp);
 	PlayerInputComponent->BindAxis("LookRight", this, &AMasterCharacter::InputLookRight);
 
-	// Bind action input events
+	//** Bind action input events **//
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AMasterCharacter::InputSprintPressed);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AMasterCharacter::InputSprintReleased);
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AMasterCharacter::InputCrouchPressed);
@@ -530,6 +637,11 @@ void AMasterCharacter::UpdateCharacterState(const ECharacterState UpdatedCharact
 	case ECharacterState::Aiming:
 
 		// Aiming State updated
+
+		if (auto Equipment = InventoryComponent->GetCurrentEquipment())
+		{
+			Equipment->SetSecondaryAction(bState);
+		}
 
 		if (bState)
 		{
@@ -766,6 +878,10 @@ void AMasterCharacter::UpdateShoulder(const EShoulder NewShoulder)
 
 void AMasterCharacter::HandleCamera(float DeltaTime, const bool bIsLocal)
 {
+	// NOTE
+	// Camera updates are relevant for every client because of spectating
+
+	//** Camera Updates from Character and Movement States **//
 	const float CurrentDistance = CameraArm->TargetArmLength;
 	const float CurrentFov = PlayerCamera->FieldOfView;
 	const float SettingsFov = SettingsSubsystem->FOV;
@@ -777,11 +893,37 @@ void AMasterCharacter::HandleCamera(float DeltaTime, const bool bIsLocal)
 	float UpdatedDistance = FMath::FInterpTo<float>(CurrentDistance, CameraData.Distance, DeltaTime, CameraData.DistanceInterpSpeed);
 	float UpdatedFov = FMath::FInterpTo<float>(CurrentFov, SettingsFov + CameraData.FovOffset, DeltaTime, CameraData.FovOffsetInterpSped);
 	float UpdatedShoulderOffset = FMath::FInterpTo<float>(CurrentShoulderOffset, TargetShoulderOffset, DeltaTime, CameraData.ShoudlerOffsetInterpSpeed);
-
-	CameraArm->TargetArmLength = UpdatedDistance;
+	
+	//CameraArm->TargetArmLength = UpdatedDistance;
 	PlayerCamera->SetFieldOfView(UpdatedFov);
 	CameraArm->SocketOffset.Y = UpdatedShoulderOffset;
 
+	//** General Camera Updates **//
+
+	// Test spring arm collision
+	FHitResult HitResult(ForceInit);
+	FCollisionShape Shape = FCollisionShape::MakeSphere(CameraArm->ProbeSize * 2.0f);
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(this);
+	const FVector StartLocation = CameraArm->GetComponentLocation();
+	const FVector EndLocation = CameraArm->GetSocketLocation(CameraArm->SocketName);
+	//GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, CameraArm->ProbeChannel, CollisionParams);
+	GetWorld()->SweepSingleByChannel(HitResult, StartLocation, EndLocation, FQuat::Identity, CameraArm->ProbeChannel, Shape, CollisionParams);
+
+	if (HitResult.bBlockingHit)
+	{
+		const float BlockDistance = FVector::Distance(StartLocation, HitResult.ImpactPoint);
+		const float InterpSpeed = (BlockDistance >= CurrentDistance ? FreeCameraInterpSpeed : BlockedCameraInterpSpeed);
+		UpdatedDistance = FMath::FInterpTo(CameraArm->TargetArmLength, BlockDistance, DeltaTime, InterpSpeed);
+	}
+
+	CameraArm->TargetArmLength = UpdatedDistance;
+
+	// Update follow location
+	const FVector CurrentCameraLocation = CameraArm->GetComponentLocation();
+	const FVector TargetCameraLocation = GetActorLocation() + FVector(0.0f, 0.0f, CAMERA_HEIGHT);
+	const FVector UpdatedCameraLocation = FMath::VInterpTo(CurrentCameraLocation, TargetCameraLocation, DeltaTime, CameraData.FollowSpeed);
+	CameraArm->SetWorldLocation(UpdatedCameraLocation);
 }
 
 void AMasterCharacter::HealthUpdated(const float NewValue, const float Percent)

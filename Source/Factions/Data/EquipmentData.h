@@ -57,3 +57,15 @@ struct FInventoryVerticalEquipment
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment Data")
 	UEquipmentData* SupportBombData;
 };
+
+USTRUCT(BlueprintType)
+struct FInventoryHorizontalEquipment
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment Data")
+	UEquipmentData* ShortWeaponData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment Data")
+	UEquipmentData* LargeWeaponData;
+};
