@@ -54,6 +54,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "User Interface")
 	void DisplayHUD(UBaseHUD* HUDToDisplay);
 
+	/**
+	* Gets a reference to the HUD specified, returns nullptr if never added to the user interface subsystem
+	* @param HUDSubclass The subclass of the HUD element you want to get a reference of
+	* @return Reference to the HUD widget
+	*/
+	UFUNCTION(BlueprintCallable, Category = "User Interface")
+	UBaseHUD* GetHUD(TSubclassOf<UBaseHUD> HUDSubclass);
+
 private:
 	UPROPERTY()
 	TArray<UBaseMenu*> Menus;

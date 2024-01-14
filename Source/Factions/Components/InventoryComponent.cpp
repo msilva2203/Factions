@@ -85,12 +85,6 @@ void UInventoryComponent::SetupInventory()
 		ShortWeapon = GetWorld()->SpawnActor<ABaseEquipment>(HorizontalEquipmentData.ShortWeaponData->Data.EquipmentSubclass, Location, Rotation, SpawnParameters);
 		LargeWeapon = GetWorld()->SpawnActor<ABaseEquipment>(HorizontalEquipmentData.LargeWeaponData->Data.EquipmentSubclass, Location, Rotation, SpawnParameters);
 
-		//HealthKit->SetOwner(EquipmentOwner);
-		//ExplosiveBomb->SetOwner(EquipmentOwner);
-		//FireBomb->SetOwner(EquipmentOwner);
-		//SupportBomb->SetOwner(EquipmentOwner);
-		//ShortWeapon->
-
 		GetOwner()->ForceNetUpdate();
 	}
 

@@ -112,4 +112,5 @@ protected:
 
 	UPROPERTY()
 	int32 PreviousSelection;
+
 };

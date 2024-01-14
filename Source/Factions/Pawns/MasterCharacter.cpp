@@ -122,7 +122,7 @@ void AMasterCharacter::BeginPlay()
 	{
 		//** Not local begin play **//
 
-		RadarEntityComponent->PushEntity();
+
 	}
 
 	//** Authority begin play **//
@@ -155,14 +155,34 @@ void AMasterCharacter::SetupPlayerCharacter()
 	else
 	{
 		//** Not Local Player Character Setup **//
+		const ETeamComparisonResult TeamComparisonResult = FactionsSessionSubsystem->CompareTeams(this, GetWorld()->GetFirstPlayerController());
 
+		switch (TeamComparisonResult)
+		{
+		case ETeamComparisonResult::Equal:
+			// TODO: Implement team mate radar icon and nametag
+
+			RadarEntityComponent->PushIconSubclass(RadarTeammateIconClass);
+			RadarEntityComponent->PushEntity();
+
+			break;
+		case ETeamComparisonResult::Different:
+			// TODO: Implement enemy radar icon and nametag
+
+			RadarEntityComponent->PushIconSubclass(RadarEnemyIconClass);
+			RadarEntityComponent->PushEntity();
+
+			break;
+		case ETeamComparisonResult::Invalid:
+		default:
+			break;
+		}
 
 	}
 
 	if (HasAuthority())
 	{
 		//** Authority Player Character Setup
-
 
 	}
 

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 
-#include "Factions/GameModes/MasterGameMode.h"
+#include "Factions/GameModes/MatchGameMode.h"
 #include "Factions/GameStates/SupplyRaidGameState.h"
 
 #include "SupplyRaidGameMode.generated.h"
@@ -13,7 +13,7 @@
  * 
  */
 UCLASS()
-class FACTIONS_API ASupplyRaidGameMode : public AMasterGameMode
+class FACTIONS_API ASupplyRaidGameMode : public AMatchGameMode
 {
 	GENERATED_BODY()
 
@@ -23,7 +23,7 @@ public:
 	virtual void BeginPlay() override;
 
 	virtual void PostLogin(APlayerController* PlayerController) override;
-	//virtual void HandleStartingNewPlayer_Implementation(APlayerController* PlayerController) override;
+	virtual void HandleStartingNewPlayer_Implementation(APlayerController* PlayerController) override;
 	virtual void Logout(AController* Controller) override;
 
 	virtual void PlayerPostLogin(AMasterPlayerController* Player) override;

@@ -23,9 +23,17 @@ public:
 
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Master Player Controller")
+	void OnSetupPlayerController();
+
+	UFUNCTION()
+	virtual void SetupPlayerController();
+
+	virtual void OnRep_PlayerState() override;
+
 	virtual EFactionsTeam GetEntityTeam() override;
 
-	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Master Player Controller")
+	UFUNCTION(Server, Reliable, WithValidation, BlueprintCallable, Category = "Master Player Controller")
 	void Server_SetPlayerTeam(const EFactionsTeam NewTeam);
 	void Server_SetPlayerTeam_Implementation(const EFactionsTeam NewTeam);
 	bool Server_SetPlayerTeam_Validate(const EFactionsTeam NewTeam);

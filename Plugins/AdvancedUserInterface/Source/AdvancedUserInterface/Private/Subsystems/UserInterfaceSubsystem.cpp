@@ -85,3 +85,15 @@ void UUserInterfaceSubsystem::DisplayHUD(UBaseHUD* HUDToDisplay)
 		}
 	}
 }
+
+UBaseHUD* UUserInterfaceSubsystem::GetHUD(TSubclassOf<UBaseHUD> HUDSubclass)
+{
+	for (auto Element : HUD)
+	{
+		if (Element->StaticClass() == HUDSubclass)
+		{
+			return Element;
+		}
+	}
+	return nullptr;
+}

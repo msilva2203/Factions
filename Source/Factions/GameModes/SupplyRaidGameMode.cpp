@@ -27,11 +27,11 @@ void ASupplyRaidGameMode::PostLogin(APlayerController* PlayerController)
 
 }
 
-//void ASupplyRaidGameMode::HandleStartingNewPlayer_Implementation(APlayerController* PlayerController)
-//{
-//	Super::HandleStartingNewPlayer_Implementation(PlayerController);
-//
-//}
+void ASupplyRaidGameMode::HandleStartingNewPlayer_Implementation(APlayerController* PlayerController)
+{
+	Super::HandleStartingNewPlayer_Implementation(PlayerController);
+
+}
 
 void ASupplyRaidGameMode::Logout(AController* Controller)
 {

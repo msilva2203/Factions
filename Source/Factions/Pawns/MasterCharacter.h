@@ -155,6 +155,16 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Character Camera")
 	float BlockedCameraInterpSpeed;
 
+	//
+	// Radar Data
+	//
+
+	UPROPERTY(EditDefaultsOnly, Category = "Character Radar")
+	TSubclassOf<UBaseRadarIcon> RadarTeammateIconClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Character Radar")
+	TSubclassOf<UBaseRadarIcon> RadarEnemyIconClass;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

@@ -9,6 +9,17 @@
 
 #include "MatchPlayerState.generated.h"
 
+UENUM(BlueprintType)
+enum class EPlayerMatchState : uint8
+{
+	None			UMETA(DisplayName = "NONE"),
+	Loading			UMETA(DisplayName = "LOADING"),
+	Spectating		UMETA(DisplayName = "SPECTATING"),
+	Playing			UMETA(DisplayName = "PLAYING")
+};
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerMatchStateUpdatedDelegate, EPlayerMatchState, PlayerMatchState);
+
 /**
  * 
  */
@@ -29,12 +40,24 @@ public:
 	UInventoryComponent* InventoryComponent;
 
 	UFUNCTION(BlueprintCallable, Category = "Match Player State")
+	void SetPlayerMatchState(const EPlayerMatchState NewValue);
+
+	UFUNCTION(BlueprintCallable, Category = "Match Player State")
 	void SetIsDead(const bool bNewValue);
+
+	UPROPERTY(ReplicatedUsing = OnRep_PlayerMatchState, BlueprintReadOnly, Category = "Match Player State")
+	EPlayerMatchState PlayerMatchState;
 
 	UPROPERTY(ReplicatedUsing = OnRep_IsDead, BlueprintReadOnly, Category = "Match Player State")
 	bool bIsDead;
 
+	UPROPERTY(BlueprintAssignable, Category = "Matcg Player State")
+	FOnPlayerMatchStateUpdatedDelegate OnPlayerMatchStateUpdated;
+
 protected:
 	UFUNCTION()
 	void OnRep_IsDead();
+
+	UFUNCTION()
+	void OnRep_PlayerMatchState();
 };

@@ -24,14 +24,6 @@ void URadarEntityComponent::BeginPlay()
 
 	// ...
 
-	auto Player = GetWorld()->GetFirstPlayerController();
-	if (Player)
-	{
-		if (auto LocalPlayer = Player->GetLocalPlayer())
-		{
-			RadarSubsystem = LocalPlayer->GetSubsystem<URadarSubsystem>();
-		}
-	}
 	//RadarSubsystem = Player->GetLocalPlayer()->GetSubsystem<URadarSubsystem>();
 }
 
@@ -51,7 +43,14 @@ void URadarEntityComponent::PushEntity()
 
 	if (Icon)
 	{
-		RadarSubsystem->AddRadarIcon(Icon);
+		if (auto Player = GetWorld()->GetFirstPlayerController())
+		{
+			if (auto LocalPlayer = Player->GetLocalPlayer())
+			{
+				RadarSubsystem = LocalPlayer->GetSubsystem<URadarSubsystem>();
+				RadarSubsystem->AddRadarIcon(Icon);
+			}
+		}
 	}
 }
 
@@ -61,6 +60,11 @@ void URadarEntityComponent::RemoveEntity()
 	{
 		RadarSubsystem->RemoveRadarIcon(Icon);
 	}
+}
+
+void URadarEntityComponent::PushIconSubclass(TSubclassOf<UBaseRadarIcon> NewClass)
+{
+	RadarIconSubclass = NewClass;
 }
 
 void URadarEntityComponent::UpdateIconTransform(FRadarTransform IconTransform)

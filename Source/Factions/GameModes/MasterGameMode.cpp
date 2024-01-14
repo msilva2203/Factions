@@ -14,6 +14,7 @@ AMasterGameMode::AMasterGameMode() :
 	PlayerControllerClass = AMasterPlayerController::StaticClass();
 	PlayerStateClass = AMasterPlayerState::StaticClass();
 
+	DefaultPlayerName = FText::FromName(TEXT("FACTIONS PLAYER"));
 }
 
 void AMasterGameMode::BeginPlay()
@@ -36,11 +37,11 @@ void AMasterGameMode::PostLogin(APlayerController* PlayerController)
 	}
 }
 
-//void AMasterGameMode::HandleStartingNewPlayer_Implementation(APlayerController* PlayerController)
-//{
-//	Super::HandleStartingNewPlayer_Implementation(PlayerController);
-//
-//}
+void AMasterGameMode::HandleStartingNewPlayer_Implementation(APlayerController* PlayerController)
+{
+	Super::HandleStartingNewPlayer_Implementation(PlayerController);
+
+}
 
 void AMasterGameMode::Logout(AController* Controller)
 {

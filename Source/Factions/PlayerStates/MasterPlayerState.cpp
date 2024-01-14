@@ -43,6 +43,16 @@ void AMasterPlayerState::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 }
 
+void AMasterPlayerState::CopyProperties(APlayerState* PlayerState)
+{
+	Super::CopyProperties(PlayerState);
+
+	if (auto PS = Cast<AMasterPlayerState>(PlayerState))
+	{
+		PS->PlayerTeam = PlayerTeam;
+	}
+}
+
 void AMasterPlayerState::OnRep_PlayerName()
 {
 	Super::OnRep_PlayerName();

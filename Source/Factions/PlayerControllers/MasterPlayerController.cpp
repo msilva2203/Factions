@@ -16,7 +16,23 @@ void AMasterPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	
+	if (HasAuthority())
+	{
+		SetupPlayerController();
+	}
+}
+
+void AMasterPlayerController::SetupPlayerController()
+{
+	// Notify blueprint classes
+	OnSetupPlayerController();
+}
+
+void AMasterPlayerController::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	SetupPlayerController();
 }
 
 EFactionsTeam AMasterPlayerController::GetEntityTeam()

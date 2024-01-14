@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 
-#include "Factions/PlayerControllers/MasterPlayerController.h"
+#include "Factions/PlayerControllers/MatchPlayerController.h"
 
 #include "SupplyRaidPlayerController.generated.h"
 
@@ -12,7 +12,7 @@
  * 
  */
 UCLASS()
-class FACTIONS_API ASupplyRaidPlayerController : public AMasterPlayerController
+class FACTIONS_API ASupplyRaidPlayerController : public AMatchPlayerController
 {
 	GENERATED_BODY()
 	

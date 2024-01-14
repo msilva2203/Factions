@@ -35,6 +35,9 @@ public:
 	void RemoveEntity();
 
 	UFUNCTION(BlueprintCallable, Category = "Radar Entity Component")
+	void PushIconSubclass(TSubclassOf<UBaseRadarIcon> NewClass);
+
+	UFUNCTION(BlueprintCallable, Category = "Radar Entity Component")
 	void UpdateIconTransform(FRadarTransform IconTransform);
 
 	UPROPERTY(EditAnywhere, Category = "Radar Entity Component")

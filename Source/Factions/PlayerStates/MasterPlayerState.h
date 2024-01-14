@@ -29,6 +29,8 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	virtual void CopyProperties(APlayerState* PlayerState) override;
+
 	virtual void OnRep_PlayerName() override;
 
 	virtual EFactionsTeam GetEntityTeam() override;

@@ -17,7 +17,9 @@ void AMatchPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	// Enables variable replication
+	DOREPLIFETIME(AMatchPlayerState, PlayerMatchState);
 	DOREPLIFETIME(AMatchPlayerState, bIsDead);
+	
 }
 
 void AMatchPlayerState::BeginPlay()
@@ -36,6 +38,16 @@ void AMatchPlayerState::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 }
 
+void AMatchPlayerState::SetPlayerMatchState(const EPlayerMatchState NewValue)
+{
+	if (GetNetMode() < NM_Client)
+	{
+		PlayerMatchState = NewValue;
+		OnRep_PlayerMatchState();
+		ForceNetUpdate();
+	}
+}
+
 void AMatchPlayerState::SetIsDead(const bool bNewValue)
 {
 	if (GetNetMode() < NM_Client)
@@ -49,4 +61,9 @@ void AMatchPlayerState::SetIsDead(const bool bNewValue)
 void AMatchPlayerState::OnRep_IsDead()
 {
 
+}
+
+void AMatchPlayerState::OnRep_PlayerMatchState()
+{
+	OnPlayerMatchStateUpdated.Broadcast(PlayerMatchState);
 }

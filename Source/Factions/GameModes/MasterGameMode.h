@@ -23,7 +23,7 @@ public:
 	virtual void BeginPlay() override;
 
 	virtual void PostLogin(APlayerController* PlayerController) override;
-	//virtual void HandleStartingNewPlayer_Implementation(APlayerController* PlayerController) override;
+	virtual void HandleStartingNewPlayer_Implementation(APlayerController* PlayerController) override;
 	virtual void Logout(AController* Controller) override;
 
 	UFUNCTION()
