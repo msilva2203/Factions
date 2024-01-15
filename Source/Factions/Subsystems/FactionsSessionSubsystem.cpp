@@ -102,20 +102,10 @@ void UFactionsSessionSubsystem::SetSessionGameMode(const EFactionsGameMode NewGa
 	OnSessionGameModeUpdated.Broadcast(SessionGameMode);
 }
 
-void UFactionsSessionSubsystem::DamageEntity(AActor* Entity, float Damage)
+void UFactionsSessionSubsystem::DamageEntity(AActor* Entity, float Damage, AActor* Instigator, AActor* Causer)
 {
-	TArray<UActorComponent*> Comps;
-	Entity->GetComponents(UEntityAttributeComponent::StaticClass(), Comps);
-
-	for (auto Comp : Comps)
+	if (auto Interface = Cast<IFactionsEntityInterface>(Entity))
 	{
-		if (auto AttribComp = Cast<UEntityAttributeComponent>(Comp))
-		{
-			FName CompName = TEXT("Health");
-			if (AttribComp->AttributeName.IsEqual(CompName))
-			{
-				AttribComp->OffsetAttributeValue(Damage * -1.0f);
-			}
-		}
+		Interface->DamageEntity(Damage, Instigator, Causer);
 	}
 }

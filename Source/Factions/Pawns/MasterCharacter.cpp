@@ -100,8 +100,8 @@ void AMasterCharacter::BeginPlay()
 	ListeningStaminaComponent->OnAttributeUpdated.AddDynamic(this, &AMasterCharacter::ListeningStaminaUpdated);
 
 	// Update default character and movement states
-	UpdateCharacterState(CharacterState, true);
-	UpdateMovementState(MovementState, true);
+	//UpdateCharacterState(CharacterState, true);
+	//UpdateMovementState(MovementState, true);
 
 	// Updates shoulder
 	UpdateShoulder(Shoulder);
@@ -143,6 +143,7 @@ void AMasterCharacter::SetupPlayerCharacter()
 	if (auto PS = Cast<AMatchPlayerState>(GetPlayerState()))
 	{
 		InventoryComponent = PS->InventoryComponent;
+		InventoryComponent->SetOwningCharacter(this);
 		InventoryComponent->OnSelectionUpdated.AddDynamic(this, &AMasterCharacter::OnInventorySelectionUpdated);
 	}
 
@@ -491,6 +492,11 @@ EFactionsTeam AMasterCharacter::GetEntityTeam()
 		return Interface->GetEntityTeam();
 	}
 	return EFactionsTeam::None;
+}
+
+void AMasterCharacter::DamageEntity(float Damage, AActor* DamageInstigator, AActor* Causer)
+{
+	HealthComponent->OffsetAttributeValue(Damage * -1.0f);
 }
 
 void AMasterCharacter::SetCharacterState(const ECharacterState NewCharacterState)

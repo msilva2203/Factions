@@ -2,6 +2,7 @@
 
 
 #include "Factions/BaseActors/BaseWeapon.h"
+#include "Factions/Pawns/MasterCharacter.h"
 
 ABaseWeapon::ABaseWeapon()
 {
@@ -117,6 +118,9 @@ void ABaseWeapon::StartFire()
 
 void ABaseWeapon::Fire()
 {
+	// Calls the actual action of firing
+	FireAction();
+
 	// Decrement burst counter
 	CurrentBurst--;
 	
@@ -134,6 +138,25 @@ void ABaseWeapon::Fire()
 void ABaseWeapon::ReleaseFire()
 {
 	bFiring = false;
+}
+
+void ABaseWeapon::FireAction()
+{
+	if (auto MasterCharacter = Cast<AMasterCharacter>(OwningCharacter))
+	{
+		const FVector Start = MasterCharacter->PlayerCamera->GetComponentLocation();
+		const FVector End = Start + (MasterCharacter->PlayerCamera->GetForwardVector() * 10000.0f);
+
+		FHitResult HitResult(ForceInit);
+		FCollisionQueryParams Params;
+		GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_Visibility, Params);
+
+		if (HitResult.bBlockingHit)
+		{
+			GetGameInstance()->GetSubsystem<UFactionsSessionSubsystem>()->DamageEntity(HitResult.GetActor(), WeaponDamage, GetInstigator(), this);
+		}
+	}
+
 }
 
 void ABaseWeapon::Server_HoldWeaponTrigger_Implementation()

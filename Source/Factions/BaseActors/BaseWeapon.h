@@ -46,8 +46,14 @@ public:
 	UFUNCTION()
 	void ReleaseFire();
 
+	UFUNCTION()
+	virtual void FireAction();
+
 	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
 	UWeaponData* WeaponData;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
+	float WeaponDamage;
 
 private:
 	UFUNCTION(Server, Reliable, WithValidation)

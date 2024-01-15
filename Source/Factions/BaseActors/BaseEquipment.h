@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 
 #include "GameFramework/Actor.h"
+#include "GameFramework/Character.h"
 
 #include "BaseEquipment.generated.h"
 
@@ -53,4 +54,7 @@ public:
 	*/
 	UFUNCTION()
 	virtual void SetSecondaryAction(const bool bNewValue);
+
+	UPROPERTY(BlueprintReadOnly, Category = "Equipment")
+	ACharacter* OwningCharacter;
 };

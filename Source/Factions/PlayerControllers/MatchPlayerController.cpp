@@ -55,6 +55,24 @@ void AMatchPlayerController::SetupPlayerController()
 	}
 }
 
+void AMatchPlayerController::OnPossess(APawn* InPawn)
+{
+	if (auto PS = GetPlayerState<AMatchPlayerState>())
+	{
+		PS->SetPlayerMatchState(EPlayerMatchState::Playing);
+	}
+
+	if (PreviousPawn)
+	{
+		PreviousPawn->K2_DestroyActor();
+	}
+	PreviousPawn = InPawn;
+}
+
+void AMatchPlayerController::OnUnPossess()
+{
+}
+
 void AMatchPlayerController::PlayerMatchStateUpdated(const EPlayerMatchState NewValue)
 {
 	PlayerMatchState = NewValue;
@@ -66,8 +84,16 @@ void AMatchPlayerController::PlayerMatchStateUpdated(const EPlayerMatchState New
 	case EPlayerMatchState::Loading:
 		break;
 	case EPlayerMatchState::Spectating:
+
+		SetInputMode(FInputModeGameOnly());
+		bShowMouseCursor = false;
+
 		break;
 	case EPlayerMatchState::Playing:
+
+		SetInputMode(FInputModeGameOnly());
+		bShowMouseCursor = false;
+
 		break;
 	default:
 		break;

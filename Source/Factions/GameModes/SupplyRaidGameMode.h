@@ -18,7 +18,7 @@ class FACTIONS_API ASupplyRaidGameMode : public AMatchGameMode
 	GENERATED_BODY()
 
 public:
-	ASupplyRaidGameMode();
+	ASupplyRaidGameMode(const FObjectInitializer& ObjectInitializer);
 
 	virtual void BeginPlay() override;
 

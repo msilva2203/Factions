@@ -7,8 +7,8 @@
 #include "Factions/PlayerControllers/MasterPlayerController.h"
 #include "Factions/PlayerStates/MasterPlayerState.h"
 
-AMasterGameMode::AMasterGameMode() :
-	Super()
+AMasterGameMode::AMasterGameMode(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer)
 {
 	GameStateClass = AMasterGameState::StaticClass();
 	PlayerControllerClass = AMasterPlayerController::StaticClass();
@@ -24,6 +24,11 @@ void AMasterGameMode::BeginPlay()
 	// Chaches a reference to the factions session subsytem
 	FactionsSessionSubsystem = GetGameInstance()->GetSubsystem<UFactionsSessionSubsystem>();
 
+}
+
+void AMasterGameMode::Start()
+{
+	OnStart();
 }
 
 void AMasterGameMode::PostLogin(APlayerController* PlayerController)
@@ -73,6 +78,23 @@ void AMasterGameMode::PlayerPostLogin(AMasterPlayerController* PlayerController)
 void AMasterGameMode::PlayerLogout(AMasterPlayerController* PlayerController)
 {
 
+}
+
+int32 AMasterGameMode::GetTeamSize(const EFactionsTeam Team)
+{
+	int32 Count = 0;
+	for (auto Player : ConnectedPlayers)
+	{
+		const auto PlayerTeam = FactionsSessionSubsystem->GetEntityTeam(Player);
+		if (PlayerTeam == Team)
+			Count++;
+	}
+	return Count;
+}
+
+void AMasterGameMode::gm_start()
+{
+	Start();
 }
 
 

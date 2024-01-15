@@ -81,7 +81,7 @@ public:
 	void SetSessionGameMode(const EFactionsGameMode NewGameMode);
 
 	UFUNCTION(BlueprintCallable, Category = "Factions Session")
-	void DamageEntity(AActor* Entity, float Damage);
+	void DamageEntity(AActor* Entity, float Damage, AActor* Instigator, AActor* Causer);
 
 	/**
 	* Player states currently on the session

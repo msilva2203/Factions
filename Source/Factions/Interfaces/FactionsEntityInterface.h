@@ -26,4 +26,5 @@ class FACTIONS_API IFactionsEntityInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	virtual EFactionsTeam GetEntityTeam();
+	virtual void DamageEntity(float Damage, AActor* DamageInstigator, AActor* Causer);
 };

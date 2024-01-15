@@ -35,6 +35,9 @@ public:
 	UFUNCTION()
 	void SetupInventory();
 
+	UFUNCTION()
+	void SetOwningCharacter(ACharacter* Character);
+
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void SetSelection(const int32 NewValue);
 

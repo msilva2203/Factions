@@ -21,7 +21,7 @@ class FACTIONS_API ALobbyGameMode : public AMasterGameMode
 	GENERATED_BODY()
 	
 public:
-	ALobbyGameMode();
+	ALobbyGameMode(const FObjectInitializer& ObjectInitializer);
 
 	virtual void BeginPlay() override;
 

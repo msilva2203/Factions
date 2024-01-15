@@ -7,8 +7,8 @@
 #include "Factions/GameStates/LobbyGameState.h"
 #include "Factions/PlayerControllers/LobbyPlayerController.h"
 
-ALobbyGameMode::ALobbyGameMode() :
-	Super()
+ALobbyGameMode::ALobbyGameMode(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer)
 {
 	PlayerStateClass = ALobbyPlayerState::StaticClass();
 	GameStateClass = ALobbyGameState::StaticClass();

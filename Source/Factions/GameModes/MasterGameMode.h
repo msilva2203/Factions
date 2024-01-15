@@ -18,9 +18,15 @@ class FACTIONS_API AMasterGameMode : public AGameModeBase
 	GENERATED_BODY()
 
 public:
-	AMasterGameMode();
+	AMasterGameMode(const FObjectInitializer& ObjectInitializer);
 
 	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Match Game Mode")
+	void OnStart();
+
+	UFUNCTION()
+	virtual void Start();
 
 	virtual void PostLogin(APlayerController* PlayerController) override;
 	virtual void HandleStartingNewPlayer_Implementation(APlayerController* PlayerController) override;
@@ -31,6 +37,12 @@ public:
 
 	UFUNCTION()
 	virtual void PlayerLogout(AMasterPlayerController* PlayerController);
+
+	UFUNCTION()
+	int32 GetTeamSize(const EFactionsTeam Team);
+
+	UFUNCTION(Exec, Category = "Master Game Mode")
+	void gm_start();
 
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Master Game Mode")

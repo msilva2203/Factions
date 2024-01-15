@@ -9,3 +9,7 @@ EFactionsTeam IFactionsEntityInterface::GetEntityTeam()
 {
 	return EFactionsTeam::None;
 }
+
+void IFactionsEntityInterface::DamageEntity(float Damage, AActor* DamageInstigator, AActor* Causer)
+{
+}

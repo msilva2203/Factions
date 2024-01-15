@@ -90,7 +90,7 @@ UBaseHUD* UUserInterfaceSubsystem::GetHUD(TSubclassOf<UBaseHUD> HUDSubclass)
 {
 	for (auto Element : HUD)
 	{
-		if (Element->StaticClass() == HUDSubclass)
+		if (Element->GetClass() == HUDSubclass)
 		{
 			return Element;
 		}

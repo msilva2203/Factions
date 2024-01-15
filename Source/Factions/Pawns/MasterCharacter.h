@@ -276,6 +276,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual EFactionsTeam GetEntityTeam() override;
+	virtual void DamageEntity(float Damage, AActor* DamageInstigator, AActor* Causer) override;
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Character")
 	void OnCharacterStateUpdated(const ECharacterState UpdatedCharacterState, const bool bState);

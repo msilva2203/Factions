@@ -29,6 +29,9 @@ public:
 
 	virtual void SetupPlayerController() override;
 
+	virtual void OnPossess(APawn* InPawn) override;
+	virtual void OnUnPossess() override;
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "Match Player Controller")
 	void OnPlayerMatchStateUpdated(const EPlayerMatchState NewValue);
 
@@ -40,6 +43,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Spectating")
 	TArray<AArenaCamera*> ArenaCameras;
+
+	UPROPERTY()
+	APawn* PreviousPawn;
 
 protected:
 	UFUNCTION()

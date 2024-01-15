@@ -90,6 +90,19 @@ void UInventoryComponent::SetupInventory()
 
 }
 
+void UInventoryComponent::SetOwningCharacter(ACharacter* Character)
+{
+	if (GetOwner()->HasAuthority())
+	{
+		HealthKit->SetInstigator(Character);
+		FireBomb->SetInstigator(Character);
+		ExplosiveBomb->SetInstigator(Character);
+		SupportBomb->SetInstigator(Character);
+		ShortWeapon->SetInstigator(Character);
+		LargeWeapon->SetInstigator(Character);
+	}
+}
+
 void UInventoryComponent::SetSelection(const int32 NewValue)
 {
 	// Requests the server to change the value if new value is different from current value

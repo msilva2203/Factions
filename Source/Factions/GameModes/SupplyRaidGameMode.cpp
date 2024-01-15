@@ -6,8 +6,8 @@
 #include "Factions/PlayerControllers/SupplyRaidPlayerController.h"
 #include "Factions/PlayerStates/MatchPlayerState.h"
 
-ASupplyRaidGameMode::ASupplyRaidGameMode() :
-	Super()
+ASupplyRaidGameMode::ASupplyRaidGameMode(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer)
 {
 	GameStateClass = ASupplyRaidGameState::StaticClass();
 	PlayerStateClass = AMatchPlayerState::StaticClass();
