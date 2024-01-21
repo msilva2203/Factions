@@ -24,6 +24,9 @@ struct FFactionsWeaponData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
 	float BurstRate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
+	int32 MagSize;
 };
 
 /**

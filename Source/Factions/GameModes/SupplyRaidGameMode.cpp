@@ -19,6 +19,34 @@ void ASupplyRaidGameMode::BeginPlay()
 	Super::BeginPlay();
 
 	SupplyRaidGameState = Cast<ASupplyRaidGameState>(GameState);
+
+	// Default match rules
+	SupplyRaidGameState->SetRemainingTime(1200, true);
+	SupplyRaidGameState->SetTeamReinforcements(EFactionsTeam::Team01, 20);
+	SupplyRaidGameState->SetTeamReinforcements(EFactionsTeam::Team02, 20);
+}
+
+void ASupplyRaidGameMode::Start()
+{
+	Super::Start();
+}
+
+bool ASupplyRaidGameMode::CanPlayerRespawn(AMasterPlayerController* Player) const
+{
+	Super::CanPlayerRespawn(Player);
+
+	const auto PlayerTeam = FactionsSessionSubsystem->GetEntityTeam(Player);
+	const int32 TeamReinforcements = SupplyRaidGameState->GetTeamReinforcements(PlayerTeam);
+	return TeamReinforcements > 0;
+}
+
+void ASupplyRaidGameMode::RespawnPlayer(AMasterPlayerController* Player)
+{
+	Super::RespawnPlayer(Player);
+
+	const auto PlayerTeam = FactionsSessionSubsystem->GetEntityTeam(Player);
+	const int32 TeamReinforcements = SupplyRaidGameState->GetTeamReinforcements(PlayerTeam);
+	SupplyRaidGameState->SetTeamReinforcements(PlayerTeam, TeamReinforcements - 1);
 }
 
 void ASupplyRaidGameMode::PostLogin(APlayerController* PlayerController)
@@ -59,9 +87,4 @@ void ASupplyRaidGameMode::gm_sr_update_team1reinforcements(const int32 NewValue)
 void ASupplyRaidGameMode::gm_sr_update_team2reinforcements(const int32 NewValue)
 {
 	SupplyRaidGameState->SetTeamReinforcements(EFactionsTeam::Team02, NewValue);
-}
-
-void ASupplyRaidGameMode::gm_sr_update_timeremaining(const int32 Time)
-{
-	SupplyRaidGameState->SetRemainingTime(Time, true);
 }

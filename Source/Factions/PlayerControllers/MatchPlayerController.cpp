@@ -3,9 +3,11 @@
 
 #include "Factions/PlayerControllers/MatchPlayerController.h"
 #include "Kismet/GameplayStatics.h"
+#include "Factions/Pawns/MasterCharacter.h"
 
 
-AMatchPlayerController::AMatchPlayerController()
+AMatchPlayerController::AMatchPlayerController(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer)
 {
 
 }
@@ -33,6 +35,15 @@ void AMatchPlayerController::Tick(float DeltaTime)
 
 }
 
+bool AMatchPlayerController::IsEntityDead() const
+{
+	if (auto PS = GetPlayerState<AMatchPlayerState>())
+	{
+		return PS->IsEntityDead();
+	}
+	return false;
+}
+
 void AMatchPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
@@ -52,14 +63,25 @@ void AMatchPlayerController::SetupPlayerController()
 	if (auto PS = GetPlayerState<AMatchPlayerState>())
 	{
 		PS->OnPlayerMatchStateUpdated.AddDynamic(this, &AMatchPlayerController::PlayerMatchStateUpdated);
+
+		PlayerMatchStateUpdated(PS->PlayerMatchState);
 	}
 }
 
 void AMatchPlayerController::OnPossess(APawn* InPawn)
 {
-	if (auto PS = GetPlayerState<AMatchPlayerState>())
+	Super::OnPossess(InPawn);
+
+	if (auto NewCharacter = Cast<AMasterCharacter>(InPawn))
 	{
-		PS->SetPlayerMatchState(EPlayerMatchState::Playing);
+		if (auto PS = GetPlayerState<AMatchPlayerState>())
+		{
+			PS->SetPlayerMatchState(EPlayerMatchState::Playing);
+		}
+	}
+	else
+	{
+		UnPossess();
 	}
 
 	if (PreviousPawn)
@@ -71,6 +93,21 @@ void AMatchPlayerController::OnPossess(APawn* InPawn)
 
 void AMatchPlayerController::OnUnPossess()
 {
+	Super::OnUnPossess();
+}
+
+bool AMatchPlayerController::IsSpectating() const
+{
+	return PlayerMatchState == EPlayerMatchState::Spectating;
+}
+
+void AMatchPlayerController::SpectateCamera(AArenaCamera* Camera)
+{
+	if (IsSpectating())
+	{
+		Camera->Spectate(this);
+		ArenaCameras.Find(Camera, SpectatingCameraIndex);
+	}
 }
 
 void AMatchPlayerController::PlayerMatchStateUpdated(const EPlayerMatchState NewValue)
@@ -87,6 +124,11 @@ void AMatchPlayerController::PlayerMatchStateUpdated(const EPlayerMatchState New
 
 		SetInputMode(FInputModeGameOnly());
 		bShowMouseCursor = false;
+
+		if (!ArenaCameras.IsEmpty())
+		{
+			SpectateCamera(ArenaCameras[SpectatingCameraIndex]);
+		}
 
 		break;
 	case EPlayerMatchState::Playing:
@@ -105,15 +147,24 @@ void AMatchPlayerController::PlayerMatchStateUpdated(const EPlayerMatchState New
 
 void AMatchPlayerController::InputSpectateCamera()
 {
-	if (PlayerMatchState == EPlayerMatchState::Spectating)
+	if (IsSpectating())
 	{
+		SpectatingCameraIndex++;
+		if (SpectatingCameraIndex >= ArenaCameras.Num())
+		{
+			SpectatingCameraIndex = 0;
+		}
 
+		if (!ArenaCameras.IsEmpty())
+		{
+			SpectateCamera(ArenaCameras[SpectatingCameraIndex]);
+		}
 	}
 }
 
 void AMatchPlayerController::InputSpectatePlayer()
 {
-	if (PlayerMatchState == EPlayerMatchState::Spectating)
+	if (IsSpectating())
 	{
 
 	}

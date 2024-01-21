@@ -18,7 +18,7 @@ class FACTIONS_API AMasterGameState : public AGameStateBase
 	GENERATED_BODY()
 	
 public:
-	AMasterGameState();
+	AMasterGameState(const FObjectInitializer& ObjectInitializer);
 
 	virtual void BeginPlay() override;
 

@@ -19,7 +19,7 @@ class FACTIONS_API AMasterPlayerController : public APlayerController, public IF
 	GENERATED_BODY()
 	
 public:
-	AMasterPlayerController();
+	AMasterPlayerController(const FObjectInitializer& ObjectInitializer);
 
 	virtual void BeginPlay() override;
 
@@ -32,6 +32,7 @@ public:
 	virtual void OnRep_PlayerState() override;
 
 	virtual EFactionsTeam GetEntityTeam() override;
+	virtual bool IsEntityDead() const override;
 
 	UFUNCTION(Server, Reliable, WithValidation, BlueprintCallable, Category = "Master Player Controller")
 	void Server_SetPlayerTeam(const EFactionsTeam NewTeam);

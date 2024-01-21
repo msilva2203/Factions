@@ -7,6 +7,7 @@
 #include "GameFramework/Actor.h"
 #include "Factions/Factions.h"
 #include "Factions/PlayerControllers/MasterPlayerController.h"
+#include "Factions/Pawns/MasterCharacter.h"
 
 #include "PlayerSpawner.generated.h"
 
@@ -34,6 +35,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Player Spawner")
 	bool IsAvailable();
+
+	UPROPERTY(EditAnywhere, Category = "Player Spawner")
+	TSubclassOf<AMasterCharacter> CharacterSubclass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player Spawner")
 	EFactionsTeam SpawnerTeam;

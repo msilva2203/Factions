@@ -3,7 +3,7 @@
 
 #include "Factions/PlayerStates/LobbyPlayerState.h"
 
-ALobbyPlayerState::ALobbyPlayerState() :
-	Super()
+ALobbyPlayerState::ALobbyPlayerState(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer)
 {
 }

@@ -27,4 +27,5 @@ class FACTIONS_API IFactionsEntityInterface
 public:
 	virtual EFactionsTeam GetEntityTeam();
 	virtual void DamageEntity(float Damage, AActor* DamageInstigator, AActor* Causer);
+	virtual bool IsEntityDead() const;
 };

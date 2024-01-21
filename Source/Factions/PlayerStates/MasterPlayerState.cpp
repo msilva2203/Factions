@@ -6,7 +6,8 @@
 #include "Net/UnrealNetwork.h"
 #include "Factions/Subsystems/FactionsSessionSubsystem.h"
 
-AMasterPlayerState::AMasterPlayerState() :
+AMasterPlayerState::AMasterPlayerState(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer),
 	bArrived(false)
 {
 	NetDormancy = ENetDormancy::DORM_DormantAll;
@@ -58,7 +59,7 @@ void AMasterPlayerState::OnRep_PlayerName()
 	Super::OnRep_PlayerName();
 
 	bArrived = true;
-	OnPlayerArrived.Broadcast();
+	OnPlayerArrived.Broadcast(this);
 }
 
 EFactionsTeam AMasterPlayerState::GetEntityTeam()

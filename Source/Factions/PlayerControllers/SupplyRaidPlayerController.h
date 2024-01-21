@@ -17,6 +17,8 @@ class FACTIONS_API ASupplyRaidPlayerController : public AMatchPlayerController
 	GENERATED_BODY()
 	
 public:
+	ASupplyRaidPlayerController(const FObjectInitializer& ObjectInitializer);
+
 	virtual void BeginPlay() override;
 
 };

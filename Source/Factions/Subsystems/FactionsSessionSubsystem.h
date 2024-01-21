@@ -83,6 +83,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Factions Session")
 	void DamageEntity(AActor* Entity, float Damage, AActor* Instigator, AActor* Causer);
 
+	UFUNCTION(BlueprintCallable, Category = "Factions Session")
+	bool IsEntityDead(AActor* Entity);
+
 	/**
 	* Player states currently on the session
 	*/

@@ -3,7 +3,8 @@
 
 #include "Factions/GameStates/MasterGameState.h"
 
-AMasterGameState::AMasterGameState()
+AMasterGameState::AMasterGameState(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer)
 {
 	NetDormancy = ENetDormancy::DORM_DormantAll;
 	NetUpdateFrequency = 0.0f;

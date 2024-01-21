@@ -24,6 +24,9 @@ struct FFactionsEquipmentData
 	TSubclassOf<ABaseEquipment> EquipmentSubclass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment Data")
+	int32 DefaultAmount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment Data")
 	TArray<EMaterial> RecipeMaterials;
 };
 

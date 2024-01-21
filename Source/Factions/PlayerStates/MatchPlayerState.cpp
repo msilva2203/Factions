@@ -5,7 +5,9 @@
 
 #include "Net/UnrealNetwork.h"
 
-AMatchPlayerState::AMatchPlayerState()
+AMatchPlayerState::AMatchPlayerState(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer),
+	bIsDead(true)
 {
 	// Inventory component
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
@@ -30,12 +32,20 @@ void AMatchPlayerState::BeginPlay()
 	{
 		InventoryComponent->SetupInventory();
 	}
+
+	OnRep_PlayerMatchState();
+	OnRep_IsDead();
 }
 
 void AMatchPlayerState::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
+}
+
+bool AMatchPlayerState::IsEntityDead() const
+{
+	return bIsDead;
 }
 
 void AMatchPlayerState::SetPlayerMatchState(const EPlayerMatchState NewValue)
@@ -60,7 +70,7 @@ void AMatchPlayerState::SetIsDead(const bool bNewValue)
 
 void AMatchPlayerState::OnRep_IsDead()
 {
-
+	OnPlayerDeadUpdated.Broadcast(bIsDead);
 }
 
 void AMatchPlayerState::OnRep_PlayerMatchState()

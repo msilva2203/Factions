@@ -91,7 +91,7 @@ class FACTIONS_API AMasterCharacter : public ACharacter, public IFactionsEntityI
 
 public:
 	// Sets default values for this character's properties
-	AMasterCharacter();
+	AMasterCharacter(const FObjectInitializer& ObjectInitializer);
 
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 

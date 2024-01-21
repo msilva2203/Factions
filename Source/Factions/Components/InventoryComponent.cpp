@@ -99,8 +99,15 @@ void UInventoryComponent::SetOwningCharacter(ACharacter* Character)
 		ExplosiveBomb->SetInstigator(Character);
 		SupportBomb->SetInstigator(Character);
 		ShortWeapon->SetInstigator(Character);
-		LargeWeapon->SetInstigator(Character);
+		LargeWeapon->SetInstigator(Character);	
 	}
+
+	HealthKit->OwningCharacter = Character;
+	FireBomb->OwningCharacter = Character;
+	ExplosiveBomb->OwningCharacter = Character;
+	SupportBomb->OwningCharacter = Character;
+	ShortWeapon->OwningCharacter = Character;
+	LargeWeapon->OwningCharacter = Character;
 }
 
 void UInventoryComponent::SetSelection(const int32 NewValue)

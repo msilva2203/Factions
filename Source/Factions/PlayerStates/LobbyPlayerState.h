@@ -17,5 +17,5 @@ class FACTIONS_API ALobbyPlayerState : public AMasterPlayerState
 	GENERATED_BODY()
 	
 public:
-	ALobbyPlayerState();
+	ALobbyPlayerState(const FObjectInitializer& ObjectInitializer);
 };

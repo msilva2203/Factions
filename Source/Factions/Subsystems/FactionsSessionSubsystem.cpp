@@ -109,3 +109,12 @@ void UFactionsSessionSubsystem::DamageEntity(AActor* Entity, float Damage, AActo
 		Interface->DamageEntity(Damage, Instigator, Causer);
 	}
 }
+
+bool UFactionsSessionSubsystem::IsEntityDead(AActor* Entity)
+{
+	if (auto Interface = Cast<IFactionsEntityInterface>(Entity))
+	{
+		return Interface->IsEntityDead();
+	}
+	return false;
+}

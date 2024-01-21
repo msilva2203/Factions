@@ -2,6 +2,8 @@
 
 
 #include "Factions/BaseActors/BaseEquipment.h"
+#include "Factions/Data/EquipmentData.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ABaseEquipment::ABaseEquipment()
@@ -11,6 +13,13 @@ ABaseEquipment::ABaseEquipment()
 
 	bAlwaysRelevant = true;
 	bReplicates = true;
+}
+
+void ABaseEquipment::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ABaseEquipment, Amount);
 }
 
 // Called when the game starts or when spawned
@@ -57,4 +66,20 @@ void ABaseEquipment::SetPrimaryAction(const bool bNewValue)
 
 void ABaseEquipment::SetSecondaryAction(const bool bNewValue)
 {
+}
+
+bool ABaseEquipment::IsWeapon() const
+{
+	return false;
+}
+
+void ABaseEquipment::SetAmount(const int32 NewValue)
+{
+	Amount = NewValue;
+	OnRep_Amount();
+}
+
+void ABaseEquipment::OnRep_Amount()
+{
+	OnAmountUpdated.Broadcast(Amount);
 }

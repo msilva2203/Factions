@@ -44,6 +44,9 @@ public:
 	UFUNCTION(Exec, Category = "Master Game Mode")
 	void gm_start();
 
+	UPROPERTY()
+	bool bStarted;
+
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Master Game Mode")
 	UFactionsSessionSubsystem* FactionsSessionSubsystem;

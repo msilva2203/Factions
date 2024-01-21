@@ -10,7 +10,7 @@
 
 #include "MasterPlayerState.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPlayerArrivedDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerArrivedDelegate, AMasterPlayerState*, Player);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTeamUpdatedDelegate, EFactionsTeam, Team);
 
 /**
@@ -22,7 +22,7 @@ class FACTIONS_API AMasterPlayerState : public APlayerState, public IFactionsEnt
 	GENERATED_BODY()
 	
 public:
-	AMasterPlayerState();
+	AMasterPlayerState(const FObjectInitializer& ObjectInitializer);
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 

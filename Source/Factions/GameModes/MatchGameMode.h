@@ -28,10 +28,19 @@ public:
 	virtual void StartPlayers();
 
 	UFUNCTION()
+	virtual bool CanPlayerRespawn(AMasterPlayerController* Player) const;
+
+	UFUNCTION()
+	virtual void RespawnPlayer(AMasterPlayerController* Player);
+
+	UFUNCTION()
 	virtual APlayerSpawner* FindPlayerSpawner(AMasterPlayerController* Player);
 
 	UFUNCTION()
 	virtual void AssignTeamToPlayer(AMasterPlayerState* Player);
+
+	UFUNCTION()
+	virtual void OnGameTimeUpdate(int32 Time);
 
 	virtual void PlayerPostLogin(AMasterPlayerController* PlayerController) override;
 	virtual void PlayerLogout(AMasterPlayerController* PlayerController) override;
@@ -41,4 +50,8 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Match Game Mode")
 	TArray<APlayerSpawner*> PlayerSpawners;
+
+public:
+	UFUNCTION(Exec, Category = "Supply Raid")
+	void gm_update_timeremaining(const int32 Time);
 };

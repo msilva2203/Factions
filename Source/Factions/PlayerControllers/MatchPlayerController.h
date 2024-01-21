@@ -19,10 +19,12 @@ class FACTIONS_API AMatchPlayerController : public AMasterPlayerController
 	GENERATED_BODY()
 
 public:
-	AMatchPlayerController();
+	AMatchPlayerController(const FObjectInitializer& ObjectInitializer);
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
+
+	virtual bool IsEntityDead() const override;
 
 	// Called to bind functionality to input
 	virtual void SetupInputComponent() override;
@@ -31,6 +33,12 @@ public:
 
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
+
+	UFUNCTION(BlueprintPure, Category = "Match Player Controller")
+	bool IsSpectating() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Match Player Controller")
+	void SpectateCamera(AArenaCamera* Camera);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Match Player Controller")
 	void OnPlayerMatchStateUpdated(const EPlayerMatchState NewValue);
@@ -43,6 +51,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Spectating")
 	TArray<AArenaCamera*> ArenaCameras;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Spectating")
+	int32 SpectatingCameraIndex;
 
 	UPROPERTY()
 	APawn* PreviousPawn;

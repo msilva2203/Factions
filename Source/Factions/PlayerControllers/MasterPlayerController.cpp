@@ -6,7 +6,8 @@
 #include "GameFramework/PlayerState.h"
 #include "Factions/PlayerStates/MasterPlayerState.h"
 
-AMasterPlayerController::AMasterPlayerController()
+AMasterPlayerController::AMasterPlayerController(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer)
 {
 	NetDormancy = ENetDormancy::DORM_DormantAll;
 	NetUpdateFrequency = 0.0f;
@@ -43,6 +44,11 @@ EFactionsTeam AMasterPlayerController::GetEntityTeam()
 		return Interface->GetEntityTeam();
 	}
 	return EFactionsTeam::None;
+}
+
+bool AMasterPlayerController::IsEntityDead() const
+{
+	return true;
 }
 
 void AMasterPlayerController::Server_SetPlayerTeam_Implementation(const EFactionsTeam NewTeam)

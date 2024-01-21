@@ -8,7 +8,8 @@
 #include "Factions/PlayerStates/MasterPlayerState.h"
 
 AMasterGameMode::AMasterGameMode(const FObjectInitializer& ObjectInitializer) :
-	Super(ObjectInitializer)
+	Super(ObjectInitializer),
+	bStarted(false)
 {
 	GameStateClass = AMasterGameState::StaticClass();
 	PlayerControllerClass = AMasterPlayerController::StaticClass();
@@ -28,6 +29,7 @@ void AMasterGameMode::BeginPlay()
 
 void AMasterGameMode::Start()
 {
+	bStarted = true;
 	OnStart();
 }
 

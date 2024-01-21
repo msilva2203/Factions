@@ -9,6 +9,10 @@
 
 #include "BaseEquipment.generated.h"
 
+class UEquipmentData;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAmountUpdatedDelegate, int32, NewAmount);
+
 UCLASS()
 class FACTIONS_API ABaseEquipment : public AActor
 {
@@ -19,6 +23,8 @@ public:
 	ABaseEquipment();
 
 protected:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -55,6 +61,25 @@ public:
 	UFUNCTION()
 	virtual void SetSecondaryAction(const bool bNewValue);
 
+	UFUNCTION(BlueprintPure, Category = "Equipment")
+	virtual bool IsWeapon() const;
+
+	UFUNCTION()
+	virtual void SetAmount(const int32 NewValue);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Equipment")
+	UEquipmentData* EquipmentData;
+
+	UPROPERTY(ReplicatedUsing = "OnRep_Amount", BlueprintReadOnly, Category = "Equipment")
+	int32 Amount;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Equipment")
 	ACharacter* OwningCharacter;
+
+	UPROPERTY(BlueprintAssignable, Category = "Equipment")
+	FOnAmountUpdatedDelegate OnAmountUpdated;
+
+protected:
+	UFUNCTION()
+	virtual void OnRep_Amount();
 };

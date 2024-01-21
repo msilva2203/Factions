@@ -5,6 +5,11 @@
 
 #include "Factions/Subsystems/FactionsSessionSubsystem.h"
 
+ALobbyPlayerController::ALobbyPlayerController(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer)
+{
+}
+
 void ALobbyPlayerController::Client_RegisterPlayersInLobby_Implementation()
 {
 	auto FactionsSessionSubsystem = GetGameInstance()->GetSubsystem<UFactionsSessionSubsystem>();

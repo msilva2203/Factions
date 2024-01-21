@@ -3,10 +3,18 @@
 
 #include "Factions/BaseActors/BaseWeapon.h"
 #include "Factions/Pawns/MasterCharacter.h"
+#include "Net/UnrealNetwork.h"
 
 ABaseWeapon::ABaseWeapon()
 {
 
+}
+
+void ABaseWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ABaseWeapon, MagAmount);
 }
 
 void ABaseWeapon::BeginPlay()
@@ -73,6 +81,11 @@ void ABaseWeapon::SetSecondaryAction(const bool bNewValue)
 	GetWorldTimerManager().ClearTimer(BurstTimerHandle);
 }
 
+bool ABaseWeapon::IsWeapon() const
+{
+	return true;
+}
+
 void ABaseWeapon::HoldWeaponTrigger()
 {	
 	bHoldingTrigger = true;
@@ -118,9 +131,6 @@ void ABaseWeapon::StartFire()
 
 void ABaseWeapon::Fire()
 {
-	// Calls the actual action of firing
-	FireAction();
-
 	// Decrement burst counter
 	CurrentBurst--;
 	
@@ -133,6 +143,17 @@ void ABaseWeapon::Fire()
 	
 	// Notify blueprint classes
 	OnFire();
+
+	if (HasAmmo())
+	{
+		// Calls the actual action of firing
+		FireAction();
+
+		// Updated weapon ammo
+		SetAmount(Amount - 1);
+		SetMagAmount(MagAmount - 1);
+	}
+	
 }
 
 void ABaseWeapon::ReleaseFire()
@@ -149,14 +170,32 @@ void ABaseWeapon::FireAction()
 
 		FHitResult HitResult(ForceInit);
 		FCollisionQueryParams Params;
-		GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_Visibility, Params);
+		Params.AddIgnoredActor(OwningCharacter);
+		Params.AddIgnoredActor(this);
 
+		GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_Visibility, Params);
 		if (HitResult.bBlockingHit)
 		{
 			GetGameInstance()->GetSubsystem<UFactionsSessionSubsystem>()->DamageEntity(HitResult.GetActor(), WeaponDamage, GetInstigator(), this);
 		}
 	}
 
+}
+
+void ABaseWeapon::SetMagAmount(const int32 NewValue)
+{
+	MagAmount = NewValue;
+	OnRep_MagAmount();
+}
+
+bool ABaseWeapon::HasAmmo()
+{
+	return MagAmount > 0;
+}
+
+void ABaseWeapon::OnRep_MagAmount()
+{
+	OnMagAmountUpdated.Broadcast(MagAmount);
 }
 
 void ABaseWeapon::Server_HoldWeaponTrigger_Implementation()

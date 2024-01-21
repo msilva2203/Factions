@@ -22,7 +22,8 @@
 
 
 // Sets default values
-AMasterCharacter::AMasterCharacter() :
+AMasterCharacter::AMasterCharacter(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer),
 	FreeCameraInterpSpeed(CAMERA_INTERP_SPEED_FREE),
 	BlockedCameraInterpSpeed(CAMERA_INTERP_SPEED_BLOCKED),
 	CharacterState(ECharacterState::Default),
@@ -100,8 +101,8 @@ void AMasterCharacter::BeginPlay()
 	ListeningStaminaComponent->OnAttributeUpdated.AddDynamic(this, &AMasterCharacter::ListeningStaminaUpdated);
 
 	// Update default character and movement states
-	//UpdateCharacterState(CharacterState, true);
-	//UpdateMovementState(MovementState, true);
+	UpdateCharacterState(CharacterState, true);
+	UpdateMovementState(MovementState, true);
 
 	// Updates shoulder
 	UpdateShoulder(Shoulder);
@@ -128,6 +129,7 @@ void AMasterCharacter::BeginPlay()
 	//** Authority begin play **//
 	if (HasAuthority())
 	{
+		// Can setup character immediately since there is no latency on server
 		SetupPlayerCharacter();
 
 	}
@@ -140,9 +142,10 @@ void AMasterCharacter::SetupPlayerCharacter()
 	//** General Player Character Setup **//
 
 	// Gets a reference to the player state's inventory
-	if (auto PS = Cast<AMatchPlayerState>(GetPlayerState()))
+	auto MatchPlayerState = Cast<AMatchPlayerState>(GetPlayerState());
+	if (MatchPlayerState)
 	{
-		InventoryComponent = PS->InventoryComponent;
+		InventoryComponent = MatchPlayerState->InventoryComponent;
 		InventoryComponent->SetOwningCharacter(this);
 		InventoryComponent->OnSelectionUpdated.AddDynamic(this, &AMasterCharacter::OnInventorySelectionUpdated);
 	}
@@ -184,7 +187,10 @@ void AMasterCharacter::SetupPlayerCharacter()
 	if (HasAuthority())
 	{
 		//** Authority Player Character Setup
-
+		if (MatchPlayerState)
+		{
+			MatchPlayerState->SetIsDead(false);
+		}
 	}
 
 	// Notify blueprint classes
@@ -954,7 +960,13 @@ void AMasterCharacter::HandleCamera(float DeltaTime, const bool bIsLocal)
 
 void AMasterCharacter::HealthUpdated(const float NewValue, const float Percent)
 {
-
+	if (NewValue <= 0.0f)
+	{
+		if (auto PS = Cast<AMatchPlayerState>(GetPlayerState()))
+		{
+			PS->SetIsDead(true);
+		}
+	}
 }
 
 void AMasterCharacter::StaminaUpdated(const float NewValue, const float Percent)

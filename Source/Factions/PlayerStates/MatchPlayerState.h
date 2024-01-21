@@ -19,6 +19,7 @@ enum class EPlayerMatchState : uint8
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerMatchStateUpdatedDelegate, EPlayerMatchState, PlayerMatchState);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerDeadUpdatedDelegate, const bool, bIsDead);
 
 /**
  * 
@@ -29,12 +30,14 @@ class FACTIONS_API AMatchPlayerState : public AMasterPlayerState
 	GENERATED_BODY()
 	
 public:
-	AMatchPlayerState();
+	AMatchPlayerState(const FObjectInitializer& ObjectInitializer);
 
 	virtual void GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const override;
 
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+	virtual bool IsEntityDead() const override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
 	UInventoryComponent* InventoryComponent;
@@ -53,6 +56,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Matcg Player State")
 	FOnPlayerMatchStateUpdatedDelegate OnPlayerMatchStateUpdated;
+
+	UPROPERTY(BlueprintAssignable, Category = "Matcg Player State")
+	FOnPlayerDeadUpdatedDelegate OnPlayerDeadUpdated;
 
 protected:
 	UFUNCTION()

@@ -5,7 +5,8 @@
 
 #include "net/UnrealNetwork.h"
 
-ALobbyGameState::ALobbyGameState()
+ALobbyGameState::ALobbyGameState(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer)
 {
 	NetDormancy = ENetDormancy::DORM_DormantAll;
 	NetUpdateFrequency = 0.0f;

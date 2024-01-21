@@ -13,3 +13,8 @@ EFactionsTeam IFactionsEntityInterface::GetEntityTeam()
 void IFactionsEntityInterface::DamageEntity(float Damage, AActor* DamageInstigator, AActor* Causer)
 {
 }
+
+bool IFactionsEntityInterface::IsEntityDead() const
+{
+	return false;
+}

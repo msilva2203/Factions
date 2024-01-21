@@ -21,6 +21,10 @@ public:
 	ASupplyRaidGameMode(const FObjectInitializer& ObjectInitializer);
 
 	virtual void BeginPlay() override;
+	virtual void Start() override;
+
+	virtual bool CanPlayerRespawn(AMasterPlayerController* Player) const override;
+	virtual void RespawnPlayer(AMasterPlayerController* Player) override;
 
 	virtual void PostLogin(APlayerController* PlayerController) override;
 	virtual void HandleStartingNewPlayer_Implementation(APlayerController* PlayerController) override;
@@ -39,6 +43,4 @@ public:
 	UFUNCTION(Exec, Category = "Supply Raid")
 	void gm_sr_update_team2reinforcements(const int32 NewValue);
 
-	UFUNCTION(Exec, Category = "Supply Raid")
-	void gm_sr_update_timeremaining(const int32 Time);
 };

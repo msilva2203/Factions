@@ -8,10 +8,10 @@
 #define DEFAULT_TEAM_REINFORCEMENTS 20
 #define DEFAULT_REMAINING_TIME 1200
 
-ASupplyRaidGameState::ASupplyRaidGameState() :
+ASupplyRaidGameState::ASupplyRaidGameState(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer),
 	Team1Reinforcements(DEFAULT_TEAM_REINFORCEMENTS),
-	Team2Reinforcements(DEFAULT_TEAM_REINFORCEMENTS),
-	RemainingTime(DEFAULT_REMAINING_TIME)
+	Team2Reinforcements(DEFAULT_TEAM_REINFORCEMENTS)
 {
 }
 
@@ -22,8 +22,6 @@ void ASupplyRaidGameState::GetLifetimeReplicatedProps(TArray< FLifetimeProperty 
 	// Enables variable replication
 	DOREPLIFETIME(ASupplyRaidGameState, Team1Reinforcements);
 	DOREPLIFETIME(ASupplyRaidGameState, Team2Reinforcements);
-	DOREPLIFETIME_CONDITION(ASupplyRaidGameState, RemainingTime, COND_InitialOnly);
-	DOREPLIFETIME(ASupplyRaidGameState, bInProgress);
 
 }
 
@@ -34,29 +32,6 @@ void ASupplyRaidGameState::BeginPlay()
 	OnRep_Team1Reinforcements();
 	OnRep_Team2Reinforcements();
 	OnRep_RemainingTime();
-}
-
-void ASupplyRaidGameState::SetRemainingTime(const int32 Time, const bool bForce)
-{
-	if (GetWorld()->GetNetMode() < ENetMode::NM_Client)
-	{
-		RemainingTime = Time;
-		OnRep_RemainingTime();
-
-		if (bForce)
-		{
-			NetMulticast_SetRemainingTime(RemainingTime);
-		}
-	}
-}
-
-void ASupplyRaidGameState::SetInProgress(const bool bNewValue)
-{
-	if (GetWorld()->GetNetMode() < ENetMode::NM_Client)
-	{
-		bInProgress = bNewValue;
-		OnRep_InProgress();
-	}
 }
 
 void ASupplyRaidGameState::SetTeamReinforcements(const EFactionsTeam Team, const int32 NewValue)
@@ -79,6 +54,24 @@ void ASupplyRaidGameState::SetTeamReinforcements(const EFactionsTeam Team, const
 		default:
 			break;
 		}
+
+		ForceNetUpdate();
+	}
+}
+
+int32 ASupplyRaidGameState::GetTeamReinforcements(const EFactionsTeam Team)
+{
+	switch (Team)
+	{
+	case EFactionsTeam::None:
+	case EFactionsTeam::Enemy:
+		return -1;
+	case EFactionsTeam::Team01:
+		return Team1Reinforcements;
+	case EFactionsTeam::Team02:
+		return Team2Reinforcements;
+	default:
+		return -1;
 	}
 }
 
@@ -94,50 +87,22 @@ void ASupplyRaidGameState::OnRep_Team2Reinforcements()
 	TestTeamLeadership();
 }
 
-void ASupplyRaidGameState::OnRep_RemainingTime()
-{
-	OnGameTimeUpdate.Broadcast(RemainingTime);
-}
-
-void ASupplyRaidGameState::OnRep_InProgress()
-{
-	if (bInProgress)
-	{
-		GetWorld()->GetTimerManager().SetTimer(GameTimer, this, &ASupplyRaidGameState::OnGameTimerUpdate, 1.0f, true, 1.0f);
-	}
-	else
-	{
-		GetWorld()->GetTimerManager().ClearTimer(GameTimer);
-	}
-}
-
-void ASupplyRaidGameState::OnGameTimerUpdate()
-{
-	RemainingTime--;
-	OnRep_RemainingTime();
-}
-
-void ASupplyRaidGameState::NetMulticast_SetRemainingTime_Implementation(const int32 Time)
-{
-	RemainingTime = Time;
-	OnRep_RemainingTime();
-}
-
 void ASupplyRaidGameState::TestTeamLeadership()
 {
+	EFactionsTeam Leader = EFactionsTeam::None;
 	if (Team1Reinforcements > Team2Reinforcements)
 	{
-		OnTeamLeadershipUpdated.Broadcast(EFactionsTeam::Team01);
-		return;
+		Leader = EFactionsTeam::Team01;
 	}
 	if (Team2Reinforcements > Team1Reinforcements)
 	{
-		OnTeamLeadershipUpdated.Broadcast(EFactionsTeam::Team02);
-		return;
+		Leader = EFactionsTeam::Team02;
 	}
-	if (Team1Reinforcements == Team2Reinforcements)
+
+	if (LeadingTeam != Leader)
 	{
-		OnTeamLeadershipUpdated.Broadcast(EFactionsTeam::None);
-		return;
+		OnTeamLeadershipUpdated.Broadcast(Leader);
+		LeadingTeam = Leader;
 	}
+	
 }

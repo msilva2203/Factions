@@ -2,7 +2,6 @@
 
 
 #include "Factions/BaseActors/PlayerSpawner.h"
-#include "Factions/Pawns/MasterCharacter.h"
 
 // Sets default values
 APlayerSpawner::APlayerSpawner() :
@@ -36,9 +35,18 @@ EFactionsTeam APlayerSpawner::GetEntityTeam()
 
 void APlayerSpawner::SpawnPlayer(AMasterPlayerController* Player)
 {
+	Player->UnPossess();
+
+	// Spawning the character
 	FActorSpawnParameters SpawnParameters;
-	auto NewCharacter = GetWorld()->SpawnActor<AMasterCharacter>(GetActorLocation(), GetActorRotation(), SpawnParameters);
+	ESpawnActorCollisionHandlingMethod SpawnCollisionMethod = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	auto NewCharacter = GetWorld()->SpawnActorDeferred<AMasterCharacter>(CharacterSubclass, GetActorTransform(), Player, nullptr, SpawnCollisionMethod);
+
+	// Setup character properties and possession
 	Player->Possess(NewCharacter);
+
+	// Finish spawning
+	NewCharacter->FinishSpawning(GetActorTransform());
 
 	bIsAvailable = false;
 }
