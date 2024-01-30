@@ -47,6 +47,9 @@ public:
 	UFUNCTION()
 	virtual void Unequip();
 
+	UFUNCTION()
+	virtual void ResetEquipment();
+
 	/*
 	* Equivalent to pressing or releasing R2/R1
 	* Examples: shoot, reload, use medkit, etc...

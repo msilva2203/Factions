@@ -38,6 +38,30 @@ class FACTIONS_API UWeaponData : public UPrimaryDataAsset
 	GENERATED_BODY()
 	
 public:
+	UFUNCTION(BlueprintPure, Category = "Weapons")
+	bool IsFullAuto(int32 Level) const;
+
+	UFUNCTION(BlueprintPure, Category = "Weapons")
+	int32 GetBurstAmount(int32 Level) const;
+
+	UFUNCTION(BlueprintPure, Category = "Weapons")
+	float GetFireRate(int32 Level) const;
+
+	UFUNCTION(BlueprintPure, Category = "Weapons")
+	float GetBurstRate(int32 Level) const;
+
+	UFUNCTION(BlueprintPure, Category = "Weapons")
+	int32 GetMagSize(int32 Level) const;
+
+	UFUNCTION(BlueprintPure, Category = "Weapons")
+	const FFactionsWeaponData& GetWeaponLevelData(int32 Level) const;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
-	FFactionsWeaponData Data;
+	FFactionsWeaponData Level1Data;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
+	FFactionsWeaponData Level2Data;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
+	FFactionsWeaponData Level3Data;
 };

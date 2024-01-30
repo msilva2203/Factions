@@ -116,7 +116,6 @@ void AMasterCharacter::BeginPlay()
 
 		// Caches a reference to the radar subsytem
 		RadarSubsystem = LocalPlayer->GetSubsystem<URadarSubsystem>();
-
 		RadarSubsystem->SetPhysicalRadius(1500.0f);
 	}
 	else
@@ -133,6 +132,14 @@ void AMasterCharacter::BeginPlay()
 		SetupPlayerCharacter();
 
 	}
+}
+
+void AMasterCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	// Removes entity from radar system
+	RadarEntityComponent->RemoveEntity();
 }
 
 void AMasterCharacter::SetupPlayerCharacter()
@@ -335,7 +342,7 @@ void AMasterCharacter::InputSwitchShoulderReleased()
 
 void AMasterCharacter::InputSelectRightPressed()
 {
-	if (InputData.bIsHotBarVisible)
+	if (InputData.bIsHotBarVisible && InventoryComponent->IsWeaponEquipped())
 	{
 		InventoryComponent->OffsetHorizontalSelection(1);
 	}
@@ -349,7 +356,7 @@ void AMasterCharacter::InputSelectRightPressed()
 
 void AMasterCharacter::InputSelectLeftPressed()
 {
-	if (InputData.bIsHotBarVisible)
+	if (InputData.bIsHotBarVisible && InventoryComponent->IsWeaponEquipped())
 	{
 		InventoryComponent->OffsetHorizontalSelection(-1);
 	}
@@ -363,7 +370,7 @@ void AMasterCharacter::InputSelectLeftPressed()
 
 void AMasterCharacter::InputSelectUpPressed()
 {
-	if (InputData.bIsHotBarVisible)
+	if (InputData.bIsHotBarVisible && !InventoryComponent->IsWeaponEquipped())
 	{
 		InventoryComponent->OffsetVerticalSelection(-1);
 	}
@@ -377,7 +384,7 @@ void AMasterCharacter::InputSelectUpPressed()
 
 void AMasterCharacter::InputSelectDownPressed()
 {
-	if (InputData.bIsHotBarVisible)
+	if (InputData.bIsHotBarVisible && !InventoryComponent->IsWeaponEquipped())
 	{
 		InventoryComponent->OffsetVerticalSelection(1);
 	}

@@ -68,6 +68,10 @@ void AMatchGameMode::StartPlayers()
 				{
 					UE_LOG(LogTemp, Warning, TEXT("Starting player"));
 					Spawner->SpawnPlayer(Player);
+					if (auto PS = Player->GetPlayerState<AMatchPlayerState>())
+					{
+						PS->InventoryComponent->ResetInventory();
+					}
 					break;
 				}
 			}
@@ -84,6 +88,10 @@ void AMatchGameMode::RespawnPlayer(AMasterPlayerController* Player)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Respawning player"));
 	FindPlayerSpawner(Player)->SpawnPlayer(Player);
+	if (auto PS = Player->GetPlayerState<AMatchPlayerState>())
+	{
+		PS->InventoryComponent->ResetWeapons();
+	}
 }
 
 APlayerSpawner* AMatchGameMode::FindPlayerSpawner(AMasterPlayerController* Player)

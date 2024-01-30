@@ -60,6 +60,16 @@ void ABaseEquipment::Unequip()
 	OnUnequipped();
 }
 
+void ABaseEquipment::ResetEquipment()
+{
+	int32 NewValue = 0;
+	if (EquipmentData)
+	{
+		NewValue = EquipmentData->Data.DefaultAmount;
+	}
+	SetAmount(NewValue);
+}
+
 void ABaseEquipment::SetPrimaryAction(const bool bNewValue)
 {
 }

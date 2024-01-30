@@ -11,6 +11,12 @@
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectionUpdatedDelegate, const int32, NewValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthKitUpdatedDelegate, ABaseEquipment*, Equipment);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnExplosiveUpdatedDelegate, ABaseEquipment*, Equipment);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFireBombUpdatedDelegate, ABaseEquipment*, Equipment);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSupportBombUpdatedDelegate, ABaseEquipment*, Equipment);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnShortWeaponUpdatedDelegate, ABaseEquipment*, Equipment);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLargeWeaponUpdatedDelegate, ABaseEquipment*, Equipment);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -36,6 +42,12 @@ public:
 	void SetupInventory();
 
 	UFUNCTION()
+	void ResetInventory();
+
+	UFUNCTION()
+	void ResetWeapons();
+
+	UFUNCTION()
 	void SetOwningCharacter(ACharacter* Character);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
@@ -55,6 +67,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Inventory")
 	ABaseEquipment* GetCurrentEquipment();
+
+	UFUNCTION(BlueprintPure, Category = "Inventory")
+	bool IsWeaponEquipped() const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
 	FInventoryVerticalEquipment VerticalEquipmentData;
@@ -83,8 +98,26 @@ public:
 	UPROPERTY(ReplicatedUsing = "OnRep_LargeWeapon", BlueprintReadOnly, Category = "Inventory")
 	ABaseEquipment* LargeWeapon;
 	
-	UPROPERTY(BlueprintAssignable, Category = "Inventory");
+	UPROPERTY(BlueprintAssignable, Category = "Inventory")
 	FOnSelectionUpdatedDelegate OnSelectionUpdated;
+
+	UPROPERTY(BlueprintAssignable, Category = "Inventory")
+	FOnHealthKitUpdatedDelegate OnHealthKitUpdated;
+
+	UPROPERTY(BlueprintAssignable, Category = "Inventory")
+	FOnExplosiveUpdatedDelegate OnExplosiveUpdated;
+
+	UPROPERTY(BlueprintAssignable, Category = "Inventory")
+	FOnFireBombUpdatedDelegate OnFireBombUpdated;
+
+	UPROPERTY(BlueprintAssignable, Category = "Inventory")
+	FOnSupportBombUpdatedDelegate OnSupportBombUpdated;
+
+	UPROPERTY(BlueprintAssignable, Category = "Inventory")
+	FOnShortWeaponUpdatedDelegate OnShortWeaponUpdated;
+
+	UPROPERTY(BlueprintAssignable, Category = "Inventory")
+	FOnLargeWeaponUpdatedDelegate OnLargeWeaponUpdated;
 
 protected:
 	UFUNCTION()

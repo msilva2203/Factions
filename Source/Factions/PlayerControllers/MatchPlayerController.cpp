@@ -62,8 +62,9 @@ void AMatchPlayerController::SetupPlayerController()
 
 	if (auto PS = GetPlayerState<AMatchPlayerState>())
 	{
-		PS->OnPlayerMatchStateUpdated.AddDynamic(this, &AMatchPlayerController::PlayerMatchStateUpdated);
+		OnPlayerStateReplicated.Broadcast(PS);
 
+		PS->OnPlayerMatchStateUpdated.AddDynamic(this, &AMatchPlayerController::PlayerMatchStateUpdated);
 		PlayerMatchStateUpdated(PS->PlayerMatchState);
 	}
 }

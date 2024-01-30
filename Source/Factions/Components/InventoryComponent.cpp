@@ -85,9 +85,31 @@ void UInventoryComponent::SetupInventory()
 		ShortWeapon = GetWorld()->SpawnActor<ABaseEquipment>(HorizontalEquipmentData.ShortWeaponData->Data.EquipmentSubclass, Location, Rotation, SpawnParameters);
 		LargeWeapon = GetWorld()->SpawnActor<ABaseEquipment>(HorizontalEquipmentData.LargeWeaponData->Data.EquipmentSubclass, Location, Rotation, SpawnParameters);
 
+		OnRep_HealthKit();
+		OnRep_ExplosiveBomb();
+		OnRep_FireBomb();
+		OnRep_SupportBomb();
+		OnRep_ShortWeapon();
+		OnRep_LargeWeapon();
+
 		GetOwner()->ForceNetUpdate();
 	}
 
+}
+
+void UInventoryComponent::ResetInventory()
+{
+	HealthKit->ResetEquipment();
+	ExplosiveBomb->ResetEquipment();
+	FireBomb->ResetEquipment();
+	SupportBomb->ResetEquipment();
+	ResetWeapons();
+}
+
+void UInventoryComponent::ResetWeapons()
+{
+	ShortWeapon->ResetEquipment();
+	LargeWeapon->ResetEquipment();
 }
 
 void UInventoryComponent::SetOwningCharacter(ACharacter* Character)
@@ -179,6 +201,11 @@ ABaseEquipment* UInventoryComponent::GetCurrentEquipment()
 	return GetSelectionEquipment(Selection);
 }
 
+bool UInventoryComponent::IsWeaponEquipped() const
+{
+	return (Selection >= 1 && Selection <= 4);
+}
+
 void UInventoryComponent::OnRep_Selection()
 {
 	// Does not call unequip/equip on equipment if selection did not change
@@ -202,27 +229,32 @@ void UInventoryComponent::OnRep_Selection()
 
 void UInventoryComponent::OnRep_HealthKit()
 {
+	OnHealthKitUpdated.Broadcast(HealthKit);
 }
 
 void UInventoryComponent::OnRep_ExplosiveBomb()
 {
+	OnExplosiveUpdated.Broadcast(ExplosiveBomb);
 }
 
 void UInventoryComponent::OnRep_FireBomb()
 {
+	OnFireBombUpdated.Broadcast(FireBomb);
 }
 
 void UInventoryComponent::OnRep_SupportBomb()
 {
+	OnSupportBombUpdated.Broadcast(SupportBomb);
 }
 
 void UInventoryComponent::OnRep_ShortWeapon()
 {
+	OnShortWeaponUpdated.Broadcast(ShortWeapon);
 }
 
 void UInventoryComponent::OnRep_LargeWeapon()
 {
-
+	OnLargeWeaponUpdated.Broadcast(LargeWeapon);
 }
 
 void UInventoryComponent::Server_SetSelection_Implementation(const int32 NewValue)

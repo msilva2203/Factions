@@ -59,6 +59,7 @@ void URadarEntityComponent::RemoveEntity()
 	if (Icon)
 	{
 		RadarSubsystem->RemoveRadarIcon(Icon);
+		Icon->RemoveFromParent();
 	}
 }
 

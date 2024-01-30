@@ -10,6 +10,8 @@
 
 #include "MatchPlayerController.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerStateReplicatedDelegate, AMatchPlayerState*, PlayerState);
+
 /**
  * 
  */
@@ -28,7 +30,6 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupInputComponent() override;
-
 	virtual void SetupPlayerController() override;
 
 	virtual void OnPossess(APawn* InPawn) override;
@@ -57,6 +58,9 @@ public:
 
 	UPROPERTY()
 	APawn* PreviousPawn;
+
+	UPROPERTY(BlueprintAssignable, Category = "Match Player State")
+	FOnPlayerStateReplicatedDelegate OnPlayerStateReplicated;
 
 protected:
 	UFUNCTION()

@@ -5,15 +5,16 @@
 #include "Factions/Pawns/MasterCharacter.h"
 #include "Net/UnrealNetwork.h"
 
-ABaseWeapon::ABaseWeapon()
+ABaseWeapon::ABaseWeapon() :
+	WeaponLevel(0)
 {
-
 }
 
 void ABaseWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	DOREPLIFETIME(ABaseWeapon, WeaponLevel);
 	DOREPLIFETIME(ABaseWeapon, MagAmount);
 }
 
@@ -35,6 +36,15 @@ void ABaseWeapon::Equip()
 void ABaseWeapon::Unequip()
 {
 	Super::Unequip();
+}
+
+void ABaseWeapon::ResetEquipment()
+{
+	if (Amount < EquipmentData->Data.DefaultAmount)
+	{
+		SetAmount(EquipmentData->Data.DefaultAmount);
+	}
+	SetMagAmount(WeaponData->GetMagSize(WeaponLevel));
 }
 
 void ABaseWeapon::SetPrimaryAction(const bool bNewValue)
@@ -109,17 +119,17 @@ void ABaseWeapon::StartFire()
 		bFiring = true;
 
 		// Reset burst counter
-		CurrentBurst = WeaponData->Data.BurstAmount;
+		CurrentBurst = WeaponData->GetBurstAmount(WeaponLevel);
 
 		// Fire weapon
 		Fire();
 
 		// Start release fire timer
-		const float FireTimerRate = 60.0f / WeaponData->Data.FireRate;
+		const float FireTimerRate = 60.0f / WeaponData->GetFireRate(WeaponLevel);
 		GetWorldTimerManager().SetTimer(FireTimerHandle, this, &ABaseWeapon::ReleaseFire, FireTimerRate, false);
 
 		// Start full auto timer
-		const bool bFullAuto = WeaponData->Data.bIsFullAuto;
+		const bool bFullAuto = WeaponData->IsFullAuto(WeaponLevel);
 		if (bFullAuto)
 		{
 
@@ -137,7 +147,7 @@ void ABaseWeapon::Fire()
 	// Start burst timer
 	if (CurrentBurst > 0)
 	{
-		const float BurstTimerRate = 60.0f / WeaponData->Data.BurstRate;
+		const float BurstTimerRate = 60.0f / WeaponData->GetBurstRate(WeaponLevel);
 		GetWorldTimerManager().SetTimer(BurstTimerHandle, this, &ABaseWeapon::Fire, BurstTimerRate, false);
 	}
 	
@@ -196,6 +206,10 @@ bool ABaseWeapon::HasAmmo()
 void ABaseWeapon::OnRep_MagAmount()
 {
 	OnMagAmountUpdated.Broadcast(MagAmount);
+}
+
+void ABaseWeapon::OnRep_WeaponLevel()
+{
 }
 
 void ABaseWeapon::Server_HoldWeaponTrigger_Implementation()
