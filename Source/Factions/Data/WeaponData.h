@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 
 #include "Engine/DataAsset.h"
+#include "Factions/Widgets/BaseCrosshair.h"
 
 #include "WeaponData.generated.h"
 
@@ -64,4 +65,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
 	FFactionsWeaponData Level3Data;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
+	TSubclassOf<UBaseCrosshair> CrosshairSubclass;
 };

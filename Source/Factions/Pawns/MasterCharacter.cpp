@@ -10,7 +10,6 @@
 #include "Factions/PlayerStates/MatchPlayerState.h"
 #include "Kismet/KismetSystemLibrary.h"
 
-
 #define MIN_SPRINTING_SPEED 50.0f
 #define SHOULDER_SWITCH_DELAY 0.5f
 #define MIN_SHOULDER_SWAP_SPED 25.0f
@@ -43,7 +42,7 @@ AMasterCharacter::AMasterCharacter(const FObjectInitializer& ObjectInitializer) 
 	CameraArm->SetRelativeLocation(FVector(0.0f, 0.0f, CAMERA_HEIGHT));
 	CameraArm->bUsePawnControlRotation = true;
 	CameraArm->TargetArmLength = 180.0f;
-	CameraArm->SetAbsolute(false, false, false);
+	//CameraArm->SetAbsolute(false, false, false);
 
 	// Camera
 	PlayerCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("Player Camera Component"));
@@ -958,11 +957,11 @@ void AMasterCharacter::HandleCamera(float DeltaTime, const bool bIsLocal)
 
 	CameraArm->TargetArmLength = UpdatedDistance;
 
-	// Update follow location
-	const FVector CurrentCameraLocation = CameraArm->GetComponentLocation();
-	const FVector TargetCameraLocation = GetActorLocation() + FVector(0.0f, 0.0f, CAMERA_HEIGHT);
-	const FVector UpdatedCameraLocation = FMath::VInterpTo(CurrentCameraLocation, TargetCameraLocation, DeltaTime, CameraData.FollowSpeed);
-	CameraArm->SetWorldLocation(UpdatedCameraLocation);
+	//// Update follow location
+	//const FVector CurrentCameraLocation = CameraArm->GetComponentLocation();
+	//const FVector TargetCameraLocation = GetActorLocation() + FVector(0.0f, 0.0f, CAMERA_HEIGHT);
+	//const FVector UpdatedCameraLocation = FMath::VInterpTo(CurrentCameraLocation, TargetCameraLocation, DeltaTime, CameraData.FollowSpeed);
+	//CameraArm->SetWorldLocation(UpdatedCameraLocation);
 }
 
 void AMasterCharacter::HealthUpdated(const float NewValue, const float Percent)

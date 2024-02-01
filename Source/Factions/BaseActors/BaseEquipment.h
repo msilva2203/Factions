@@ -70,11 +70,17 @@ public:
 	UFUNCTION()
 	virtual void SetAmount(const int32 NewValue);
 
+	UFUNCTION(BlueprintPure, Category = "Equipment")
+	bool IsEquipped() const;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Equipment")
 	UEquipmentData* EquipmentData;
 
 	UPROPERTY(ReplicatedUsing = "OnRep_Amount", BlueprintReadOnly, Category = "Equipment")
 	int32 Amount;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Equipment")
+	bool bEquipped;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Equipment")
 	ACharacter* OwningCharacter;

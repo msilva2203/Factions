@@ -6,6 +6,7 @@
 
 #include "Factions/BaseActors/BaseEquipment.h"
 #include "Factions/Data/WeaponData.h"
+#include "Factions/Widgets/BaseCrosshair.h"
 
 #include "BaseWeapon.generated.h"
 
@@ -72,6 +73,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
 	float WeaponDamage;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapons")
+	UBaseCrosshair* Crosshair;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Weapons")
+	float Precision;
 
 	UPROPERTY(BlueprintAssignable, Category = "Weapons")
 	FOnMagAmountUpdatedDelegate OnMagAmountUpdated;

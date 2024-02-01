@@ -4,6 +4,7 @@
 #include "Factions/BaseActors/BaseWeapon.h"
 #include "Factions/Pawns/MasterCharacter.h"
 #include "Net/UnrealNetwork.h"
+#include "AdvancedUserInterface/Public/Subsystems/UserInterfaceSubsystem.h"
 
 ABaseWeapon::ABaseWeapon() :
 	WeaponLevel(0)
@@ -21,11 +22,30 @@ void ABaseWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 void ABaseWeapon::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (IsLocalInstance())
+	{
+		auto LocalPlayer = GetWorld()->GetFirstPlayerController()->GetLocalPlayer();
+		if (auto UISubsystem = LocalPlayer->GetSubsystem<UUserInterfaceSubsystem>())
+		{
+			auto CrosshairWidget = UISubsystem->PushHUD(WeaponData->CrosshairSubclass, true);
+			Crosshair = Cast<UBaseCrosshair>(CrosshairWidget);
+			Crosshair->SetCrosshairVisibility(false);
+		}
+	}
 }
 
 void ABaseWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (IsEquipped())
+	{
+		if (IsLocalInstance())
+		{
+			Crosshair->SetPrecision(Precision);
+		}
+	}
 }
 
 void ABaseWeapon::Equip()
@@ -84,6 +104,10 @@ void ABaseWeapon::SetSecondaryAction(const bool bNewValue)
 	Super::SetSecondaryAction(bNewValue);
 
 	bAiming = bNewValue;
+	if (Crosshair)
+	{
+		Crosshair->SetCrosshairVisibility(bNewValue);
+	}
 
 	// Stop shooting when stopped aiming
 	// Stops the burst fire as well

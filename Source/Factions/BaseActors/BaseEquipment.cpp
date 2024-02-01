@@ -44,6 +44,8 @@ bool ABaseEquipment::IsLocalInstance()
 
 void ABaseEquipment::Equip()
 {
+	bEquipped = true;
+
 	if (GetOwner() == GetWorld()->GetFirstPlayerController())
 	{
 		EnableInput(GetWorld()->GetFirstPlayerController());
@@ -54,6 +56,8 @@ void ABaseEquipment::Equip()
 
 void ABaseEquipment::Unequip()
 {
+	bEquipped = false;
+
 	DisableInput(GetWorld()->GetFirstPlayerController());
 	SetPrimaryAction(false);
 
@@ -87,6 +91,11 @@ void ABaseEquipment::SetAmount(const int32 NewValue)
 {
 	Amount = NewValue;
 	OnRep_Amount();
+}
+
+bool ABaseEquipment::IsEquipped() const
+{
+	return bEquipped;
 }
 
 void ABaseEquipment::OnRep_Amount()
