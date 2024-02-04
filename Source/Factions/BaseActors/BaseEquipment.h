@@ -65,6 +65,9 @@ public:
 	virtual void SetSecondaryAction(const bool bNewValue);
 
 	UFUNCTION(BlueprintPure, Category = "Equipment")
+	virtual bool CanBeEquipped();
+
+	UFUNCTION(BlueprintPure, Category = "Equipment")
 	virtual bool IsWeapon() const;
 
 	UFUNCTION()

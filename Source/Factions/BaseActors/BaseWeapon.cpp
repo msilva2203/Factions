@@ -43,6 +43,10 @@ void ABaseWeapon::Tick(float DeltaTime)
 	{
 		if (IsLocalInstance())
 		{
+			const float PlayerVelocity = OwningCharacter->GetVelocity().Length();
+			const float TargetPrecision = (PlayerVelocity > 0.0f ? 0.5f : 1.0f);
+
+			Precision = FMath::FInterpTo(Precision, TargetPrecision, DeltaTime, WeaponData->GetPrecisionInterpSpeed(WeaponLevel));
 			Crosshair->SetPrecision(Precision);
 		}
 	}
@@ -56,6 +60,8 @@ void ABaseWeapon::Equip()
 void ABaseWeapon::Unequip()
 {
 	Super::Unequip();
+
+	SetSecondaryAction(false);
 }
 
 void ABaseWeapon::ResetEquipment()
@@ -108,11 +114,17 @@ void ABaseWeapon::SetSecondaryAction(const bool bNewValue)
 	{
 		Crosshair->SetCrosshairVisibility(bNewValue);
 	}
+	Precision = 0.0f;
 
 	// Stop shooting when stopped aiming
 	// Stops the burst fire as well
 	ReleaseWeaponTrigger();
 	GetWorldTimerManager().ClearTimer(BurstTimerHandle);
+}
+
+bool ABaseWeapon::CanBeEquipped()
+{
+	return true;
 }
 
 bool ABaseWeapon::IsWeapon() const
@@ -184,8 +196,8 @@ void ABaseWeapon::Fire()
 		FireAction();
 
 		// Updated weapon ammo
-		SetAmount(Amount - 1);
 		SetMagAmount(MagAmount - 1);
+		SetAmount(Amount - 1);
 	}
 	
 }
@@ -212,8 +224,13 @@ void ABaseWeapon::FireAction()
 		{
 			GetGameInstance()->GetSubsystem<UFactionsSessionSubsystem>()->DamageEntity(HitResult.GetActor(), WeaponDamage, GetInstigator(), this);
 		}
-	}
 
+		if (IsLocalInstance())
+		{
+			Precision = 0.0f;
+			Crosshair->SetPrecision(Precision);
+		}
+	}
 }
 
 void ABaseWeapon::SetMagAmount(const int32 NewValue)
@@ -225,6 +242,11 @@ void ABaseWeapon::SetMagAmount(const int32 NewValue)
 bool ABaseWeapon::HasAmmo()
 {
 	return MagAmount > 0;
+}
+
+int32 ABaseWeapon::GetReserves() const
+{
+	return Amount - MagAmount;
 }
 
 void ABaseWeapon::OnRep_MagAmount()

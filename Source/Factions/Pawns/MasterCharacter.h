@@ -16,6 +16,7 @@
 #include "Factions/Data/CameraData.h"
 #include "Factions/Subsystems/SettingsSubsystem.h"
 #include "Factions/Components/InventoryComponent.h"
+#include "Components/WidgetComponent.h"
 
 #include "MasterCharacter.generated.h"
 
@@ -112,10 +113,16 @@ public:
 	UEntityAttributeComponent* HealthComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
+	UEntityAttributeComponent* DownHealthComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
 	UEntityAttributeComponent* StaminaComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
 	UEntityAttributeComponent* ListeningStaminaComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
+	UWidgetComponent* DownWidgetComponent;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Character")
 	UInventoryComponent* InventoryComponent;
@@ -269,6 +276,9 @@ protected:
 	UPROPERTY()
 	FTimerHandle HotBarVisibilityTimeHandle;
 
+	UPROPERTY()
+	FTimerHandle DownTimeHandle;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -278,6 +288,10 @@ public:
 
 	virtual EFactionsTeam GetEntityTeam() override;
 	virtual void DamageEntity(float Damage, AActor* DamageInstigator, AActor* Causer) override;
+	virtual bool IsTeammate() override;
+
+	UFUNCTION()
+	void Kill();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Character")
 	void OnCharacterStateUpdated(const ECharacterState UpdatedCharacterState, const bool bState);
@@ -296,6 +310,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Character")
 	void SetShoulder(const EShoulder NewShoulder);
+
+	UFUNCTION(BlueprintPure, Category = "Character")
+	float GetDownTime();
 
 	UFUNCTION(BlueprintPure, Category = "Character")
 	bool IsInDefaultState() const;
@@ -381,6 +398,9 @@ private:
 
 	UFUNCTION()
 	void HealthUpdated(const float NewValue, const float Percent);
+
+	UFUNCTION()
+	void DownHealthUpdated(const float NewValue, const float Percent);
 
 	UFUNCTION()
 	void StaminaUpdated(const float NewValue, const float Percent);

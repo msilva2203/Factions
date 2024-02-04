@@ -36,6 +36,7 @@ public:
 	virtual void ResetEquipment() override;
 	virtual void SetPrimaryAction(const bool bNewValue) override;
 	virtual void SetSecondaryAction(const bool bNewValue) override;
+	virtual bool CanBeEquipped() override;
 	virtual bool IsWeapon() const override;
 
 	UFUNCTION()
@@ -61,6 +62,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Weapons")
 	bool HasAmmo();
+
+	UFUNCTION(BlueprintPure, Category = "Weapons")
+	int32 GetReserves() const;
 
 	UPROPERTY(ReplicatedUsing = "OnRep_WeaponLevel", BlueprintReadOnly, Category = "Weapons")
 	int32 WeaponLevel;

@@ -11,6 +11,7 @@
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectionUpdatedDelegate, const int32, NewValue);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEquippedUpdatedDelegate, ABaseEquipment*, Equipment);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthKitUpdatedDelegate, ABaseEquipment*, Equipment);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnExplosiveUpdatedDelegate, ABaseEquipment*, Equipment);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFireBombUpdatedDelegate, ABaseEquipment*, Equipment);
@@ -100,6 +101,9 @@ public:
 	
 	UPROPERTY(BlueprintAssignable, Category = "Inventory")
 	FOnSelectionUpdatedDelegate OnSelectionUpdated;
+
+	UPROPERTY(BlueprintAssignable, Category = "Inventory")
+	FOnEquippedUpdatedDelegate OnEquippedUpdated;
 
 	UPROPERTY(BlueprintAssignable, Category = "Inventory")
 	FOnHealthKitUpdatedDelegate OnHealthKitUpdated;

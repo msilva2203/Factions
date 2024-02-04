@@ -211,13 +211,17 @@ void UInventoryComponent::OnRep_Selection()
 	// Does not call unequip/equip on equipment if selection did not change
 	if (PreviousSelection != Selection)
 	{
-		if (auto PreviousEquipment = GetSelectionEquipment(PreviousSelection))
-		{
-			PreviousEquipment->Unequip();
-		}
 		if (auto CurrentEquipment = GetSelectionEquipment(Selection))
 		{
-			CurrentEquipment->Equip();
+			if (CurrentEquipment->CanBeEquipped())
+			{
+				if (auto PreviousEquipment = GetSelectionEquipment(PreviousSelection))
+				{
+					PreviousEquipment->Unequip();
+				}
+				CurrentEquipment->Equip();
+				OnEquippedUpdated.Broadcast(CurrentEquipment);
+			}
 		}
 		PreviousSelection = Selection;
 	}

@@ -18,3 +18,8 @@ bool IFactionsEntityInterface::IsEntityDead() const
 {
 	return false;
 }
+
+bool IFactionsEntityInterface::IsTeammate()
+{
+	return false;
+}

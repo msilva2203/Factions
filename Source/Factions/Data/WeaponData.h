@@ -28,6 +28,9 @@ struct FFactionsWeaponData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
 	int32 MagSize;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapons")
+	float PrecisionInterpSpeed;
 };
 
 /**
@@ -53,6 +56,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Weapons")
 	int32 GetMagSize(int32 Level) const;
+
+	UFUNCTION(BlueprintPure, Category = "Weapons")
+	float GetPrecisionInterpSpeed(int32 Level) const;
 
 	UFUNCTION(BlueprintPure, Category = "Weapons")
 	const FFactionsWeaponData& GetWeaponLevelData(int32 Level) const;

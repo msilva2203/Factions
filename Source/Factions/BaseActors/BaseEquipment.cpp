@@ -82,6 +82,11 @@ void ABaseEquipment::SetSecondaryAction(const bool bNewValue)
 {
 }
 
+bool ABaseEquipment::CanBeEquipped()
+{
+	return Amount > 0;
+}
+
 bool ABaseEquipment::IsWeapon() const
 {
 	return false;

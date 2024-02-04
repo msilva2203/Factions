@@ -28,6 +28,11 @@ int32 UWeaponData::GetMagSize(int32 Level) const
 	return GetWeaponLevelData(Level).MagSize;
 }
 
+float UWeaponData::GetPrecisionInterpSpeed(int32 Level) const
+{
+	return GetWeaponLevelData(Level).PrecisionInterpSpeed;
+}
+
 const FFactionsWeaponData& UWeaponData::GetWeaponLevelData(int32 Level) const
 {
 	Level = FMath::Clamp<int32>(Level, 0, 2);

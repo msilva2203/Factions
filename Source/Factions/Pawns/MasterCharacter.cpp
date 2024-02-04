@@ -15,6 +15,7 @@
 #define MIN_SHOULDER_SWAP_SPED 25.0f
 #define HOTBAR_VISIBILITY_TIME 2.0f
 #define CAMERA_HEIGHT 70.0f
+#define DEFAULT_DOWN_TIME 10.0f
 
 #define CAMERA_INTERP_SPEED_FREE 5.0f
 #define CAMERA_INTERP_SPEED_BLOCKED 50.0f
@@ -54,14 +55,27 @@ AMasterCharacter::AMasterCharacter(const FObjectInitializer& ObjectInitializer) 
 	// Health component
 	HealthComponent = CreateDefaultSubobject<UEntityAttributeComponent>(TEXT("Health Attribute"));
 	HealthComponent->SetIsReplicated(true);
+	HealthComponent->DefaultAttributeValue = 100.0f;
+
+	// Health component
+	DownHealthComponent = CreateDefaultSubobject<UEntityAttributeComponent>(TEXT("Down Health Attribute"));
+	DownHealthComponent->SetIsReplicated(true);
+	DownHealthComponent->DefaultAttributeValue = 40.0f;
 
 	// Stamina component
 	StaminaComponent = CreateDefaultSubobject<UEntityAttributeComponent>(TEXT("Stamina Attribute"));
 	StaminaComponent->SetIsReplicated(false);
+	StaminaComponent->DefaultAttributeValue = 100.0f;
 
 	// Listening stamina component
 	ListeningStaminaComponent = CreateDefaultSubobject<UEntityAttributeComponent>(TEXT("Listening Stamina Attribute"));
 	ListeningStaminaComponent->SetIsReplicated(false);
+	ListeningStaminaComponent->DefaultAttributeValue = 100.0f;
+
+	// Down widget component
+	DownWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("Down Widget"));
+	DownWidgetComponent->SetupAttachment(GetMesh());
+	DownWidgetComponent->SetVisibility(false);
 
 	//** Inventory component changed to player state **//
 	
@@ -96,6 +110,7 @@ void AMasterCharacter::BeginPlay()
 
 	// Binds events to attribute values changes
 	HealthComponent->OnAttributeUpdated.AddDynamic(this, &AMasterCharacter::HealthUpdated);
+	DownHealthComponent->OnAttributeUpdated.AddDynamic(this, &AMasterCharacter::DownHealthUpdated);
 	StaminaComponent->OnAttributeUpdated.AddDynamic(this, &AMasterCharacter::StaminaUpdated);
 	ListeningStaminaComponent->OnAttributeUpdated.AddDynamic(this, &AMasterCharacter::ListeningStaminaUpdated);
 
@@ -508,7 +523,28 @@ EFactionsTeam AMasterCharacter::GetEntityTeam()
 
 void AMasterCharacter::DamageEntity(float Damage, AActor* DamageInstigator, AActor* Causer)
 {
-	HealthComponent->OffsetAttributeValue(Damage * -1.0f);
+	if (!IsDown())
+	{
+		HealthComponent->OffsetAttributeValue(Damage * -1.0f);
+	}
+	else
+	{
+		DownHealthComponent->OffsetAttributeValue(Damage * -1.0f);
+	}
+}
+
+bool AMasterCharacter::IsTeammate()
+{
+	return FactionsSessionSubsystem->CompareTeams(this, GetWorld()->GetFirstPlayerController()) == ETeamComparisonResult::Equal;
+}
+
+void AMasterCharacter::Kill()
+{
+	GetWorldTimerManager().ClearTimer(DownTimeHandle);
+	if (auto PS = Cast<AMatchPlayerState>(GetPlayerState()))
+	{
+		PS->SetIsDead(true);
+	}
 }
 
 void AMasterCharacter::SetCharacterState(const ECharacterState NewCharacterState)
@@ -545,6 +581,11 @@ void AMasterCharacter::SetShoulder(const EShoulder NewShoulder)
 		Shoulder = NewShoulder;
 		OnRep_Shoulder();
 	}
+}
+
+float AMasterCharacter::GetDownTime()
+{
+	return DEFAULT_DOWN_TIME;
 }
 
 bool AMasterCharacter::IsInDefaultState() const
@@ -708,11 +749,17 @@ void AMasterCharacter::UpdateCharacterState(const ECharacterState UpdatedCharact
 
 		if (bState)
 		{
+			if (IsTeammate())
+			{
+				DownWidgetComponent->SetVisibility(true);
+			}
 
+			GetWorldTimerManager().SetTimer(DownTimeHandle, this, &AMasterCharacter::Kill, GetDownTime(), false);
 		}
 		else
 		{
-
+			DownWidgetComponent->SetVisibility(false);
+			GetWorldTimerManager().ClearTimer(DownTimeHandle);
 		}
 
 		//...
@@ -968,10 +1015,16 @@ void AMasterCharacter::HealthUpdated(const float NewValue, const float Percent)
 {
 	if (NewValue <= 0.0f)
 	{
-		if (auto PS = Cast<AMatchPlayerState>(GetPlayerState()))
-		{
-			PS->SetIsDead(true);
-		}
+		SetCharacterState(ECharacterState::Down);
+	}
+}
+
+void AMasterCharacter::DownHealthUpdated(const float NewValue, const float Percent)
+{
+	if (NewValue <= 0.0f)
+	{
+		Kill();
+		
 	}
 }
 
