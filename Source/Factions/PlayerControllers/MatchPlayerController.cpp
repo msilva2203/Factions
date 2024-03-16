@@ -50,9 +50,12 @@ void AMatchPlayerController::SetupInputComponent()
 
 	if (InputComponent)
 	{
+		FInputActionBinding CurBinding;
+
 		// Bind action events
-		InputComponent->BindAction("Spectate Camera", IE_Pressed, this, &AMatchPlayerController::InputSpectateCamera);
-		InputComponent->BindAction("Spectate Player", IE_Pressed, this, &AMatchPlayerController::InputSpectatePlayer);
+		CurBinding = InputComponent->BindAction("Spectate Camera", IE_Pressed, this, &AMatchPlayerController::InputSpectateCamera);
+		CurBinding.bConsumeInput = false;
+		CurBinding = InputComponent->BindAction("Spectate Player", IE_Pressed, this, &AMatchPlayerController::InputSpectatePlayer);
 	}
 }
 

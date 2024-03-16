@@ -9,6 +9,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Factions/PlayerStates/MatchPlayerState.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 #define MIN_SPRINTING_SPEED 50.0f
 #define SHOULDER_SWITCH_DELAY 0.5f
@@ -34,6 +35,15 @@ AMasterCharacter::AMasterCharacter(const FObjectInitializer& ObjectInitializer) 
 	PrimaryActorTick.bCanEverTick = true;
 
 	bReplicates = true;
+
+	// Input data default values
+	InputData.bBlockShoulderSwitch = false;
+	InputData.bHoldingAim = false;
+	InputData.bHoldingCrouch = false;
+	InputData.bHoldingFire = false;
+	InputData.bHoldingSprint = false;
+	InputData.bHoldingSwitchShoulder = false;
+	InputData.bIsHotBarVisible = false;
 
 	// Components
 
@@ -72,10 +82,12 @@ AMasterCharacter::AMasterCharacter(const FObjectInitializer& ObjectInitializer) 
 	ListeningStaminaComponent->SetIsReplicated(false);
 	ListeningStaminaComponent->DefaultAttributeValue = 100.0f;
 
-	// Down widget component
-	DownWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("Down Widget"));
-	DownWidgetComponent->SetupAttachment(GetMesh());
-	DownWidgetComponent->SetVisibility(false);
+	// Name tag widget component
+	NameTagWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("Name Tag Widget"));
+	NameTagWidgetComponent->SetupAttachment(GetMesh());
+	NameTagWidgetComponent->SetVisibility(false);
+	NameTagWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	NameTagWidgetComponent->SetDrawAtDesiredSize(true);
 
 	//** Inventory component changed to player state **//
 	
@@ -103,7 +115,8 @@ void AMasterCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	//** General begin play **//
-	auto LocalPlayer = GetWorld()->GetFirstPlayerController()->GetLocalPlayer();
+	auto WorldPlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	auto LocalPlayer = WorldPlayerController->GetLocalPlayer();
 
 	// Caches a reference to the factions session subsytem
 	FactionsSessionSubsystem = GetGameInstance()->GetSubsystem<UFactionsSessionSubsystem>();
@@ -159,11 +172,12 @@ void AMasterCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void AMasterCharacter::SetupPlayerCharacter()
 {
 	bool bIsLocal = IsLocallyControlled();
+	auto MatchPlayerState = Cast<AMatchPlayerState>(GetPlayerState());
+	auto WorldPlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 
 	//** General Player Character Setup **//
 
 	// Gets a reference to the player state's inventory
-	auto MatchPlayerState = Cast<AMatchPlayerState>(GetPlayerState());
 	if (MatchPlayerState)
 	{
 		InventoryComponent = MatchPlayerState->InventoryComponent;
@@ -175,7 +189,14 @@ void AMasterCharacter::SetupPlayerCharacter()
 	{
 		//** Local Player Character Setup **//
 
-
+		// Creates and binds local name tag for down display
+		NameTagWidget = CreateWidget<UNameTag>(WorldPlayerController, TeammateNameTagClass);
+		if (NameTagWidget)
+		{
+			NameTagWidget->HideName();
+			NameTagWidgetComponent->SetWidget(NameTagWidget);
+			NameTagWidgetComponent->SetVisibility(true);
+		}
 	}
 	else
 	{
@@ -190,6 +211,8 @@ void AMasterCharacter::SetupPlayerCharacter()
 			RadarEntityComponent->PushIconSubclass(RadarTeammateIconClass);
 			RadarEntityComponent->PushEntity();
 
+			NameTagWidget = CreateWidget<UNameTag>(WorldPlayerController, TeammateNameTagClass);
+
 			break;
 		case ETeamComparisonResult::Different:
 			// TODO: Implement enemy radar icon and nametag
@@ -197,12 +220,21 @@ void AMasterCharacter::SetupPlayerCharacter()
 			RadarEntityComponent->PushIconSubclass(RadarEnemyIconClass);
 			RadarEntityComponent->PushEntity();
 
+			NameTagWidget = CreateWidget<UNameTag>(WorldPlayerController, EnemyNameTagClass);
+
 			break;
 		case ETeamComparisonResult::Invalid:
 		default:
 			break;
 		}
 
+		// Binds the name tag widget to the component
+		if (NameTagWidget)
+		{
+			NameTagWidget->BindPlayerState(MatchPlayerState);
+			NameTagWidgetComponent->SetWidget(NameTagWidget);
+			NameTagWidgetComponent->SetVisibility(true);
+		}
 	}
 
 	if (HasAuthority())
@@ -410,6 +442,17 @@ void AMasterCharacter::InputSelectDownPressed()
 	InputDisplayHotBar();
 }
 
+void AMasterCharacter::InputSwitchBackpackPressed()
+{
+	ECharacterState NewState = IsInBackpack() ? ECharacterState::Default : ECharacterState::Backpack;
+	SetCharacterState(NewState);
+}
+
+void AMasterCharacter::InputSwitchBackpackReleased()
+{
+
+}
+
 void AMasterCharacter::InputCompleteShoulderSwitchDelay()
 {
 	InputData.bBlockShoulderSwitch = false;
@@ -509,6 +552,8 @@ void AMasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("SelectLeft", IE_Pressed, this, &AMasterCharacter::InputSelectLeftPressed);
 	PlayerInputComponent->BindAction("SelectUp", IE_Pressed, this, &AMasterCharacter::InputSelectUpPressed);
 	PlayerInputComponent->BindAction("SelectDown", IE_Pressed, this, &AMasterCharacter::InputSelectDownPressed);
+	PlayerInputComponent->BindAction("SwitchBackpack", IE_Pressed, this, &AMasterCharacter::InputSwitchBackpackPressed);
+	PlayerInputComponent->BindAction("SwitchBackpack", IE_Pressed, this, &AMasterCharacter::InputSwitchBackpackReleased);
 }
 
 EFactionsTeam AMasterCharacter::GetEntityTeam()
@@ -751,14 +796,14 @@ void AMasterCharacter::UpdateCharacterState(const ECharacterState UpdatedCharact
 		{
 			if (IsTeammate())
 			{
-				DownWidgetComponent->SetVisibility(true);
+				NameTagWidget->SetDownDisplayVisibilty(true);
 			}
 
 			GetWorldTimerManager().SetTimer(DownTimeHandle, this, &AMasterCharacter::Kill, GetDownTime(), false);
 		}
 		else
 		{
-			DownWidgetComponent->SetVisibility(false);
+			NameTagWidget->SetDownDisplayVisibilty(false);
 			GetWorldTimerManager().ClearTimer(DownTimeHandle);
 		}
 
@@ -770,11 +815,12 @@ void AMasterCharacter::UpdateCharacterState(const ECharacterState UpdatedCharact
 
 		if (bState)
 		{
-
+			SetMovementState(EMovementState::Idle);
+			CameraData = BackpackCameraData->Data;
 		}
 		else
 		{
-
+			SetMovementState(EMovementState::Standing);
 		}
 
 		//...
@@ -785,6 +831,7 @@ void AMasterCharacter::UpdateCharacterState(const ECharacterState UpdatedCharact
 
 	// Notify blueprint classes
 	OnCharacterStateUpdated(UpdatedCharacterState, bState);
+	OnCharacterStateUpdatedDelegate.Broadcast(UpdatedCharacterState, bState);
 }
 
 void AMasterCharacter::HandleCharacterState(float DeltaTime, const bool bIsLocal)
@@ -883,12 +930,28 @@ void AMasterCharacter::UpdateMovementState(const EMovementState UpdatedMovementS
 
 		//...
 		break;
+	case EMovementState::Idle:
+
+		// Idle State updated
+
+		if (bState)
+		{
+			CharMovement->MaxWalkSpeed = 0.0f;
+		}
+		else
+		{
+
+		}
+
+		//...
+		break;
 	default:
 		break;
 	}
 
 	// Notify blueprint classes
 	OnMovementStateUpdated(UpdatedMovementState, bState);
+	OnMovementStateUpdatedDelegate.Broadcast(UpdatedMovementState, bState);
 }
 
 void AMasterCharacter::HandleMovementState(float DeltaTime, const bool bIsLocal)
@@ -914,7 +977,7 @@ void AMasterCharacter::HandleMovementState(float DeltaTime, const bool bIsLocal)
 		// Sprinting input
 		if (InputData.bHoldingSprint)
 		{
-			if (!IsSprinting() && MovingSpeed > MIN_SPRINTING_SPEED && StaminaComponent->GetPercent() >= 0.25f && !IsAiming())
+			if (!IsSprinting() && MovingSpeed > MIN_SPRINTING_SPEED && StaminaComponent->GetPercent() >= 0.25f && !IsAiming() && !IsInBackpack())
 			{
 				SetMovementState(EMovementState::Sprinting);
 			}

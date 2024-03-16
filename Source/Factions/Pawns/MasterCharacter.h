@@ -17,6 +17,8 @@
 #include "Factions/Subsystems/SettingsSubsystem.h"
 #include "Factions/Components/InventoryComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Factions/Widgets/DownDisplay.h"
+#include "Factions/Widgets/NameTag.h"
 
 #include "MasterCharacter.generated.h"
 
@@ -34,7 +36,8 @@ enum class EMovementState : uint8
 {
 	Standing		UMETA(DisplayName = "STANDING"),
 	Crouching		UMETA(DisplayName = "CROUCHING"),
-	Sprinting		UMETA(DisplayName = "SPRINTING")
+	Sprinting		UMETA(DisplayName = "SPRINTING"),
+	Idle			UMETA(DisplayName = "IDLE")
 };
 
 UENUM(BlueprintType)
@@ -85,6 +88,10 @@ struct FInputData
 
 };
 
+// Delegate declarations
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnCharacterStateUpdatedDelegate, ECharacterState, NewValue, bool, bNewState);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnMovementStateUpdatedDelegate, EMovementState, NewValue, bool, bNewState);
+
 UCLASS()
 class FACTIONS_API AMasterCharacter : public ACharacter, public IFactionsEntityInterface
 {
@@ -122,7 +129,7 @@ public:
 	UEntityAttributeComponent* ListeningStaminaComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
-	UWidgetComponent* DownWidgetComponent;
+	UWidgetComponent* NameTagWidgetComponent;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Character")
 	UInventoryComponent* InventoryComponent;
@@ -156,6 +163,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Character Camera")
 	UCameraData* AimingCameraData;
 
+	UPROPERTY(EditAnywhere, Category = "Character Camera")
+	UCameraData* BackpackCameraData;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Character Camera")
 	float FreeCameraInterpSpeed;
 
@@ -163,7 +173,7 @@ public:
 	float BlockedCameraInterpSpeed;
 
 	//
-	// Radar Data
+	// UI Data
 	//
 
 	UPROPERTY(EditDefaultsOnly, Category = "Character Radar")
@@ -171,6 +181,29 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Character Radar")
 	TSubclassOf<UBaseRadarIcon> RadarEnemyIconClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Character Name Tag")
+	TSubclassOf<UNameTag> TeammateNameTagClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Character Name Tag")
+	TSubclassOf<UNameTag> EnemyNameTagClass;
+
+	//
+	// Widgets
+	//
+
+	UPROPERTY(BlueprintReadOnly, Category = "Character")
+	UNameTag* NameTagWidget;
+
+	//
+	// Delegates
+	//
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnCharacterStateUpdatedDelegate OnCharacterStateUpdatedDelegate;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnMovementStateUpdatedDelegate OnMovementStateUpdatedDelegate;
 
 protected:
 	// Called when the game starts or when spawned
@@ -241,6 +274,12 @@ protected:
 
 	UFUNCTION()
 	virtual void InputSelectDownPressed();
+
+	UFUNCTION()
+	virtual void InputSwitchBackpackPressed();
+
+	UFUNCTION()
+	virtual void InputSwitchBackpackReleased();
 
 	UFUNCTION()
 	void InputCompleteShoulderSwitchDelay();
