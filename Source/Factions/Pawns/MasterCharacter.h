@@ -19,6 +19,7 @@
 #include "Components/WidgetComponent.h"
 #include "Factions/Widgets/DownDisplay.h"
 #include "Factions/Widgets/NameTag.h"
+#include "Components/ViewportWidgetComponent.h"
 
 #include "MasterCharacter.generated.h"
 
@@ -129,7 +130,7 @@ public:
 	UEntityAttributeComponent* ListeningStaminaComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
-	UWidgetComponent* NameTagWidgetComponent;
+	UViewportWidgetComponent* NameTagViewportWidgetComponent;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Character")
 	UInventoryComponent* InventoryComponent;

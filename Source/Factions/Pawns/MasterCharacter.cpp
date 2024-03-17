@@ -83,11 +83,10 @@ AMasterCharacter::AMasterCharacter(const FObjectInitializer& ObjectInitializer) 
 	ListeningStaminaComponent->DefaultAttributeValue = 100.0f;
 
 	// Name tag widget component
-	NameTagWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("Name Tag Widget"));
-	NameTagWidgetComponent->SetupAttachment(GetMesh());
-	NameTagWidgetComponent->SetVisibility(false);
-	NameTagWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
-	NameTagWidgetComponent->SetDrawAtDesiredSize(true);
+	NameTagViewportWidgetComponent = CreateDefaultSubobject<UViewportWidgetComponent>(TEXT("Name Tag Viewport Widget"));
+	NameTagViewportWidgetComponent->SetupAttachment(GetMesh());
+	NameTagViewportWidgetComponent->SafeZoneX = 35.0f;
+	NameTagViewportWidgetComponent->SafeZoneY = 35.0f;
 
 	//** Inventory component changed to player state **//
 	
@@ -194,8 +193,8 @@ void AMasterCharacter::SetupPlayerCharacter()
 		if (NameTagWidget)
 		{
 			NameTagWidget->HideName();
-			NameTagWidgetComponent->SetWidget(NameTagWidget);
-			NameTagWidgetComponent->SetVisibility(true);
+			if (NameTagViewportWidgetComponent)
+				NameTagViewportWidgetComponent->SetWidget(NameTagWidget);
 		}
 	}
 	else
@@ -232,8 +231,8 @@ void AMasterCharacter::SetupPlayerCharacter()
 		if (NameTagWidget)
 		{
 			NameTagWidget->BindPlayerState(MatchPlayerState);
-			NameTagWidgetComponent->SetWidget(NameTagWidget);
-			NameTagWidgetComponent->SetVisibility(true);
+			if (NameTagViewportWidgetComponent)
+				NameTagViewportWidgetComponent->SetWidget(NameTagWidget);
 		}
 	}
 
