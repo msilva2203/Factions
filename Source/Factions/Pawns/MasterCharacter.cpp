@@ -387,6 +387,8 @@ void AMasterCharacter::InputSwitchShoulderReleased()
 
 void AMasterCharacter::InputSelectRightPressed()
 {
+	if (IsInBackpack()) return;
+
 	if (InputData.bIsHotBarVisible && InventoryComponent->IsWeaponEquipped())
 	{
 		InventoryComponent->OffsetHorizontalSelection(1);
@@ -401,6 +403,8 @@ void AMasterCharacter::InputSelectRightPressed()
 
 void AMasterCharacter::InputSelectLeftPressed()
 {
+	if (IsInBackpack()) return;
+
 	if (InputData.bIsHotBarVisible && InventoryComponent->IsWeaponEquipped())
 	{
 		InventoryComponent->OffsetHorizontalSelection(-1);
@@ -415,6 +419,8 @@ void AMasterCharacter::InputSelectLeftPressed()
 
 void AMasterCharacter::InputSelectUpPressed()
 {
+	if (IsInBackpack()) return;
+
 	if (InputData.bIsHotBarVisible && !InventoryComponent->IsWeaponEquipped())
 	{
 		InventoryComponent->OffsetVerticalSelection(-1);
@@ -429,6 +435,8 @@ void AMasterCharacter::InputSelectUpPressed()
 
 void AMasterCharacter::InputSelectDownPressed()
 {
+	if (IsInBackpack()) return;
+
 	if (InputData.bIsHotBarVisible && !InventoryComponent->IsWeaponEquipped())
 	{
 		InventoryComponent->OffsetVerticalSelection(1);

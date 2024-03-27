@@ -10,6 +10,31 @@
 #include "InventoryComponent.generated.h"
 
 
+USTRUCT(BlueprintType)
+struct FMaterialsInventory
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+	int32 Alcohol;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+	int32 Binding;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+	int32 Blade;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+	int32 Explosive;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+	int32 Rag;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+	int32 Sugar;
+};
+
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSelectionUpdatedDelegate, const int32, NewValue);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEquippedUpdatedDelegate, ABaseEquipment*, Equipment);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHealthKitUpdatedDelegate, ABaseEquipment*, Equipment);
@@ -18,6 +43,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnFireBombUpdatedDelegate, ABaseEqu
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSupportBombUpdatedDelegate, ABaseEquipment*, Equipment);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnShortWeaponUpdatedDelegate, ABaseEquipment*, Equipment);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLargeWeaponUpdatedDelegate, ABaseEquipment*, Equipment);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMaterialsInventoryDelegate, FMaterialsInventory, Materials);
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -72,6 +98,24 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Inventory")
 	bool IsWeaponEquipped() const;
 
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void CraftEquipmentRecipe(const EEquipmentSlot EquipmentSlot);
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void SetMaterialCount(const EMaterial Material, const int32 NewValue);
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void OffsetMaterialCount(const EMaterial Material, const int32 Offset);
+
+	UFUNCTION(BlueprintPure, Category = "Inventory")
+	int32 GetMaterialCount(const EMaterial Material) const;
+
+	UFUNCTION(BlueprintPure, Category = "Inventory")
+	bool CanCraftRecipe(FFactionsCraftingRecipe CraftingRecipe) const;
+
+	UFUNCTION(BlueprintPure, Category = "Inventory")
+	void GetEquipmentCraftingRecipe(const EEquipmentSlot EquipmentSlot, FFactionsCraftingRecipe& OutRecipe) const;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory")
 	FInventoryVerticalEquipment VerticalEquipmentData;
 
@@ -98,6 +142,9 @@ public:
 
 	UPROPERTY(ReplicatedUsing = "OnRep_LargeWeapon", BlueprintReadOnly, Category = "Inventory")
 	ABaseEquipment* LargeWeapon;
+
+	UPROPERTY(ReplicatedUsing = "OnRep_MaterialsInventory", BlueprintReadOnly, Category = "Inventory")
+	FMaterialsInventory MaterialsInventory;
 	
 	UPROPERTY(BlueprintAssignable, Category = "Inventory")
 	FOnSelectionUpdatedDelegate OnSelectionUpdated;
@@ -123,6 +170,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Inventory")
 	FOnLargeWeaponUpdatedDelegate OnLargeWeaponUpdated;
 
+	UPROPERTY(BlueprintAssignable, Category = "Inventory")
+	FOnMaterialsInventoryDelegate OnMaterialsInventoryUpdated;
+
 protected:
 	UFUNCTION()
 	virtual void OnRep_Selection();
@@ -145,10 +195,23 @@ protected:
 	UFUNCTION()
 	virtual void OnRep_LargeWeapon();
 
+	UFUNCTION()
+	virtual void OnRep_MaterialsInventory();
+
 	UFUNCTION(Server, Unreliable, WithValidation)
 	void Server_SetSelection(const int32 NewValue);
 	void Server_SetSelection_Implementation(const int32 NewValue);
 	bool Server_SetSelection_Validate(const int32 NewValue);
+
+	UFUNCTION(Server, Unreliable, WithValidation)
+	void Server_SetMaterialCount(const EMaterial Material, const int32 NewValue);
+	void Server_SetMaterialCount_Implementation(const EMaterial Material, const int32 NewValue);
+	bool Server_SetMaterialCount_Validate(const EMaterial Material, const int32 NewValue);
+
+	UFUNCTION(Server, Unreliable, WithValidation)
+	void Server_CraftEquipmentRecipe(const EEquipmentSlot EquipmentSlot);
+	void Server_CraftEquipmentRecipe_Implementation(const EEquipmentSlot EquipmentSlot);
+	bool Server_CraftEquipmentRecipe_Validate(const EEquipmentSlot EquipmentSlot);
 
 	UPROPERTY()
 	int32 PreviousSelection;

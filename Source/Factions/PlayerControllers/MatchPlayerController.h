@@ -62,6 +62,9 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Match Player State")
 	FOnPlayerStateReplicatedDelegate OnPlayerStateReplicated;
 
+	UFUNCTION(Exec, Category = "Master Player Controller")
+	void player_set_material(EMaterial Material, int32 NewValue);
+
 protected:
 	UFUNCTION()
 	virtual void InputSpectateCamera();

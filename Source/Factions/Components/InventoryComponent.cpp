@@ -8,12 +8,12 @@
 #include "GameFramework/PlayerState.h"
 
 
-#define SLOT_EXPLOSIVE_BOMB 5
-#define SLOT_HEALTH_KIT	6
-#define SLOT_FIRE_BOMB 7
-#define SLOT_SUPPORT_BOMB 8
-#define SLOT_SHORT_WEAPON 2
-#define SLOT_LARGE_WEAPON 1
+#define SLOT_EXPLOSIVE_BOMB		5
+#define SLOT_HEALTH_KIT			6
+#define SLOT_FIRE_BOMB			7
+#define SLOT_SUPPORT_BOMB		8
+#define SLOT_SHORT_WEAPON		2
+#define SLOT_LARGE_WEAPON		1
 
 
 // Sets default values for this component's properties
@@ -38,6 +38,8 @@ void UInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(UInventoryComponent, SupportBomb);
 	DOREPLIFETIME(UInventoryComponent, ShortWeapon);
 	DOREPLIFETIME(UInventoryComponent, LargeWeapon);
+
+	DOREPLIFETIME_CONDITION(UInventoryComponent, MaterialsInventory, COND_OwnerOnly);
 
 }
 
@@ -91,6 +93,7 @@ void UInventoryComponent::SetupInventory()
 		OnRep_SupportBomb();
 		OnRep_ShortWeapon();
 		OnRep_LargeWeapon();
+		OnRep_MaterialsInventory();
 
 		GetOwner()->ForceNetUpdate();
 	}
@@ -206,6 +209,81 @@ bool UInventoryComponent::IsWeaponEquipped() const
 	return (Selection >= 1 && Selection <= 4);
 }
 
+void UInventoryComponent::CraftEquipmentRecipe(const EEquipmentSlot EquipmentSlot)
+{
+	Server_CraftEquipmentRecipe(EquipmentSlot);
+}
+
+void UInventoryComponent::SetMaterialCount(const EMaterial Material, const int32 NewValue)
+{
+	Server_SetMaterialCount(Material, FMath::Clamp<int32>(NewValue, 0, 3 * 4));
+}
+
+void UInventoryComponent::OffsetMaterialCount(const EMaterial Material, const int32 Offset)
+{
+	SetMaterialCount(Material, GetMaterialCount(Material) + Offset);
+}
+
+int32 UInventoryComponent::GetMaterialCount(const EMaterial Material) const
+{
+	switch (Material)
+	{
+	case EMaterial::Alcohol:
+		return MaterialsInventory.Alcohol;
+
+	case EMaterial::Binding:
+		return MaterialsInventory.Binding;
+
+	case EMaterial::Blade:
+		return MaterialsInventory.Blade;
+
+	case EMaterial::Explosive:
+		return MaterialsInventory.Explosive;
+
+	case EMaterial::Rag:
+		return MaterialsInventory.Rag;
+
+	case EMaterial::Sugar:
+		return MaterialsInventory.Sugar;
+
+	case EMaterial::None:
+	default:
+		return -1;
+	}
+}
+
+bool UInventoryComponent::CanCraftRecipe(FFactionsCraftingRecipe CraftingRecipe) const
+{
+	for (auto Material : CraftingRecipe.RecipeMaterials)
+	{
+		int32 Amount = GetMaterialCount(Material);
+		if (Amount / 4 == 0) return false;
+	}
+	return true;
+}
+
+void UInventoryComponent::GetEquipmentCraftingRecipe(const EEquipmentSlot EquipmentSlot, FFactionsCraftingRecipe& OutRecipe) const
+{
+	switch (EquipmentSlot)
+	{
+	case EEquipmentSlot::HealthKit:
+		OutRecipe =  VerticalEquipmentData.HealthKitData->Data.CraftingRecipe;
+		break;
+	case EEquipmentSlot::Explosive:
+		OutRecipe = VerticalEquipmentData.ExplosiveBombData->Data.CraftingRecipe;
+		break;
+	case EEquipmentSlot::Fire:
+		OutRecipe = VerticalEquipmentData.FireBombData->Data.CraftingRecipe;
+		break;
+	case EEquipmentSlot::Support:
+		OutRecipe = VerticalEquipmentData.SupportBombData->Data.CraftingRecipe;
+		break;
+	case EEquipmentSlot::Utility:
+	default:
+		break;
+	}
+}
+
 void UInventoryComponent::OnRep_Selection()
 {
 	// Does not call unequip/equip on equipment if selection did not change
@@ -261,6 +339,11 @@ void UInventoryComponent::OnRep_LargeWeapon()
 	OnLargeWeaponUpdated.Broadcast(LargeWeapon);
 }
 
+void UInventoryComponent::OnRep_MaterialsInventory()
+{
+	OnMaterialsInventoryUpdated.Broadcast(MaterialsInventory);
+}
+
 void UInventoryComponent::Server_SetSelection_Implementation(const int32 NewValue)
 {
 	Selection = NewValue;
@@ -270,6 +353,76 @@ void UInventoryComponent::Server_SetSelection_Implementation(const int32 NewValu
 }
 
 bool UInventoryComponent::Server_SetSelection_Validate(const int32 NewValue)
+{
+	// TODO: Implement RPC validation
+	return true;
+}
+
+void UInventoryComponent::Server_SetMaterialCount_Implementation(const EMaterial Material, const int32 NewValue)
+{
+	switch (Material)
+	{
+	case EMaterial::Alcohol:
+		MaterialsInventory.Alcohol = NewValue;
+		break;
+
+	case EMaterial::Binding:
+		MaterialsInventory.Binding = NewValue;
+		break;
+
+	case EMaterial::Blade:
+		MaterialsInventory.Blade = NewValue;
+		break;
+
+	case EMaterial::Explosive:
+		MaterialsInventory.Explosive = NewValue;
+		break;
+
+	case EMaterial::Rag:
+		MaterialsInventory.Rag = NewValue;
+		break;
+
+	case EMaterial::Sugar:
+		MaterialsInventory.Sugar = NewValue;
+		break;
+
+	case EMaterial::None:
+	default:
+		break;
+	}
+
+	OnRep_MaterialsInventory();
+	GetOwner()->ForceNetUpdate();
+}
+
+bool UInventoryComponent::Server_SetMaterialCount_Validate(const EMaterial Material, const int32 NewValue)
+{
+	// TODO: Implement RPC validation
+	return true;
+}
+
+void UInventoryComponent::Server_CraftEquipmentRecipe_Implementation(const EEquipmentSlot EquipmentSlot)
+{
+	FFactionsCraftingRecipe CraftingRecipe;
+	GetEquipmentCraftingRecipe(EquipmentSlot, CraftingRecipe);
+
+	if (CanCraftRecipe(CraftingRecipe))
+	{
+		// Craft recipe
+		URecipeScript* Recipe = NewObject<URecipeScript>(CraftingRecipe.RecipeScriptClass);
+		if (Recipe) {
+			Recipe->Craft(this);
+		}
+
+		// Consume materials used
+		for (auto Material : CraftingRecipe.RecipeMaterials)
+		{
+			OffsetMaterialCount(Material, -4);
+		}
+	}
+}
+
+bool UInventoryComponent::Server_CraftEquipmentRecipe_Validate(const EEquipmentSlot EquipmentSlot)
 {
 	// TODO: Implement RPC validation
 	return true;

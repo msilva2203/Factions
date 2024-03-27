@@ -149,6 +149,17 @@ void AMatchPlayerController::PlayerMatchStateUpdated(const EPlayerMatchState New
 	OnPlayerMatchStateUpdated(NewValue);
 }
 
+void AMatchPlayerController::player_set_material(EMaterial Material, int32 NewValue)
+{
+	if (auto PlayerS = GetPlayerState<AMatchPlayerState>())
+	{
+		if (PlayerS->InventoryComponent)
+		{
+			PlayerS->InventoryComponent->SetMaterialCount(Material, NewValue);
+		}
+	}
+}
+
 void AMatchPlayerController::InputSpectateCamera()
 {
 	if (IsSpectating())
