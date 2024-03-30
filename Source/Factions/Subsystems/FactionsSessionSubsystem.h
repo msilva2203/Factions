@@ -86,6 +86,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Factions Session")
 	bool IsEntityDead(AActor* Entity);
 
+	UFUNCTION(BlueprintCallable, Category = "Factions Session")
+	void RewardEntity(AActor* Entity, const ERewardAction RewardAction);
+
 	/**
 	* Player states currently on the session
 	*/

@@ -25,6 +25,10 @@ void UViewportWidgetComponent::BeginPlay()
 	
 }
 
+void UViewportWidgetComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Widget->RemoveFromParent();
+}
 
 // Called every frame
 void UViewportWidgetComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -64,6 +68,11 @@ void UViewportWidgetComponent::SetWidget(UUserWidget* NewWidget)
 {
 	if (NewWidget)
 	{
+		if (Widget)
+		{
+			Widget->RemoveFromParent();
+		}
+
 		Widget = NewWidget;
 		Widget->AddToViewport();
 	}

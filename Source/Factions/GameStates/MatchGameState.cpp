@@ -40,6 +40,26 @@ void AMatchGameState::SetRemainingTime(const int32 Time, const bool bForce)
 	}
 }
 
+int32 AMatchGameState::GetRewardActionPoints(const ERewardAction RewardAction)
+{
+	switch (RewardAction)
+	{
+	case ERewardAction::Down:
+		return Reward_Down;
+	case ERewardAction::Execution:
+		return Reward_Execution;
+	case ERewardAction::SpecExecution:
+		return Reward_SpecExecution;
+	case ERewardAction::Assist:
+		return Reward_Assist;
+	case ERewardAction::Revive:
+		return Reward_Revive;
+	case ERewardAction::None:
+	default:
+		return 0;
+	}
+}
+
 void AMatchGameState::SetInProgress(const bool bNewValue)
 {
 	if (GetWorld()->GetNetMode() < ENetMode::NM_Client)

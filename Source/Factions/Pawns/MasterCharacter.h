@@ -20,6 +20,7 @@
 #include "Factions/Widgets/DownDisplay.h"
 #include "Factions/Widgets/NameTag.h"
 #include "Components/ViewportWidgetComponent.h"
+#include "Factions/Components/DamageDealersStack.h"
 
 #include "MasterCharacter.generated.h"
 
@@ -128,6 +129,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
 	UEntityAttributeComponent* ListeningStaminaComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
+	UDamageDealersStack* DamageDealersStack;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Character")
 	UViewportWidgetComponent* NameTagViewportWidgetComponent;

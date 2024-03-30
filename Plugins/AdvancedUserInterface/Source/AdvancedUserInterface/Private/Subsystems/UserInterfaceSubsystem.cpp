@@ -75,14 +75,27 @@ UBaseHUD* UUserInterfaceSubsystem::PushHUD(TSubclassOf<UBaseHUD> HUDSubclass, co
 	return Element;
 }
 
-void UUserInterfaceSubsystem::DisplayHUD(UBaseHUD* HUDToDisplay)
+void UUserInterfaceSubsystem::DisplayHUD(UBaseHUD* HUDToDisplay, bool bForce)
 {
-	for (auto Element : HUD)
+	if (HUDToDisplay)
 	{
-		if (Element == HUDToDisplay)
-		{
-			Element->SetVisibility(ESlateVisibility::Visible);
-		}
+		HUDToDisplay->SetHUDVisibility(true, bForce);
+	}
+}
+
+void UUserInterfaceSubsystem::HideHUD(UBaseHUD* HUDToDisplay, bool bForce)
+{
+	if (HUDToDisplay)
+	{
+		HUDToDisplay->SetHUDVisibility(false, bForce);
+	}
+}
+
+void UUserInterfaceSubsystem::ToggleHUD(UBaseHUD* HUDToToggle, bool bForce)
+{
+	if (HUDToToggle)
+	{
+		HUDToToggle->SetHUDVisibility(!HUDToToggle->bVisibility, bForce);
 	}
 }
 

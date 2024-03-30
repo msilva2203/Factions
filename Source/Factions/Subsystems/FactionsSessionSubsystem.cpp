@@ -6,6 +6,7 @@
 #include "Factions/PlayerControllers/MasterPlayerController.h"
 #include "Factions/GameStates/MasterGameState.h"
 #include "Factions/Components/EntityAttributeComponent.h"
+#include "Factions/PlayerStates/MatchPlayerState.h"
 
 DEFINE_LOG_CATEGORY(FactionsSessionLog);
 
@@ -117,4 +118,12 @@ bool UFactionsSessionSubsystem::IsEntityDead(AActor* Entity)
 		return Interface->IsEntityDead();
 	}
 	return false;
+}
+
+void UFactionsSessionSubsystem::RewardEntity(AActor* Entity, const ERewardAction RewardAction)
+{
+	if (auto PS = Cast<AMatchPlayerState>(Entity))
+	{
+		PS->AddReward(RewardAction);
+	}
 }

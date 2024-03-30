@@ -7,6 +7,7 @@
 #include "Factions/PlayerControllers/MasterPlayerController.h"
 #include "Factions/BaseActors/ArenaCamera.h"
 #include "Factions/PlayerStates/MatchPlayerState.h"
+#include "Factions/Widgets/BaseScoreboard.h"
 
 #include "MatchPlayerController.generated.h"
 
@@ -62,6 +63,15 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Match Player State")
 	FOnPlayerStateReplicatedDelegate OnPlayerStateReplicated;
 
+	UPROPERTY(EditAnywhere, Category = "HUD")
+	TSubclassOf<UBaseScoreboard> ScoreboardClass;
+
+	UPROPERTY(EditAnywhere, Category = "HUD")
+	TSubclassOf<UBaseHUD> GameModeHUDClass;
+
+	UPROPERTY(EditAnywhere, Category = "HUD")
+	TSubclassOf<UBaseHUD> MainHUDClass;
+
 	UFUNCTION(Exec, Category = "Master Player Controller")
 	void player_set_material(EMaterial Material, int32 NewValue);
 
@@ -71,4 +81,7 @@ protected:
 
 	UFUNCTION()
 	virtual void InputSpectatePlayer();
+
+	UFUNCTION()
+	virtual void InputShowScoreboard();
 };

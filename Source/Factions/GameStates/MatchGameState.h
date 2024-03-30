@@ -30,11 +30,32 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Match Game State")
 	void SetInProgress(const bool bNewValue);
 
+	UFUNCTION(BlueprintPure, Category = "Match Game State")
+	int32 GetRewardActionPoints(const ERewardAction RewardAction);
+
 	UPROPERTY(ReplicatedUsing = OnRep_RemainingTime, BlueprintReadOnly, Category = "Supply Raid")
 	int32 RemainingTime;
 
 	UPROPERTY(ReplicatedUsing = OnRep_InProgress, BlueprintReadOnly, Category = "Supply Raid")
 	bool bInProgress;
+
+	UPROPERTY(EditAnywhere, Category = "Game Rewards")
+	int32 Reward_Down;
+
+	UPROPERTY(EditAnywhere, Category = "Game Rewards")
+	int32 Reward_Execution;
+
+	UPROPERTY(EditAnywhere, Category = "Game Rewards")
+	int32 Reward_SpecExecution;
+
+	UPROPERTY(EditAnywhere, Category = "Game Rewards")
+	int32 Reward_Assist;
+
+	UPROPERTY(EditAnywhere, Category = "Game Rewards")
+	int32 Reward_ItemCraft;
+
+	UPROPERTY(EditAnywhere, Category = "Game Rewards")
+	int32 Reward_Revive;
 
 	UPROPERTY(BlueprintAssignable, Category = "Supply Raid")
 	FOnGameTimeUpdate OnGameTimeUpdate;

@@ -27,6 +27,13 @@ void AMasterPlayerController::SetupPlayerController()
 {
 	// Notify blueprint classes
 	OnSetupPlayerController();
+
+	// Gets a reference to the subsystems
+	if (IsLocalController())
+	{
+		SettingsSubsystem = GetLocalPlayer()->GetSubsystem<USettingsSubsystem>();
+		UserInterfaceSubsystem = GetLocalPlayer()->GetSubsystem<UUserInterfaceSubsystem>();
+	}
 }
 
 void AMasterPlayerController::OnRep_PlayerState()

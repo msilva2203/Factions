@@ -21,6 +21,18 @@ enum class EFactionsGameMode : uint8
 	Interrogation	UMETA(DisplayName = "INTERROGATION")
 };
 
+UENUM(BlueprintType)
+enum class ERewardAction : uint8
+{
+	None			UMETA(DisplayName = "NONE"),
+	Down			UMETA(DisplayName = "DOWN"),
+	Execution		UMETA(DisplayName = "EXECUTION"),
+	SpecExecution	UMETA(DisplayName = "SPECIAL_EXECUTION"),
+	Assist			UMETA(DisplayName = "ASSIST"),
+	ItemCrafted		UMETA(DisplayName = "ITEM_CRAFTED"),
+	Revive			UMETA(DisplayName = "REVIVE"),
+};
+
 /**
 * Factions gamemode data structure
 */

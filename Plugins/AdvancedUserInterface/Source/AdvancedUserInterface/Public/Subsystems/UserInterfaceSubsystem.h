@@ -52,7 +52,13 @@ public:
 	* @param LayerIndex The layer to display
 	*/
 	UFUNCTION(BlueprintCallable, Category = "User Interface")
-	void DisplayHUD(UBaseHUD* HUDToDisplay);
+	void DisplayHUD(UBaseHUD* HUDToDisplay, bool bForce = true);
+
+	UFUNCTION(BlueprintCallable, Category = "User Interface")
+	void HideHUD(UBaseHUD* HUDToDisplay, bool bForce = true);
+
+	UFUNCTION(BlueprintCallable, Category = "User Interface")
+	void ToggleHUD(UBaseHUD* HUDToToggle, bool bForce = true);
 
 	/**
 	* Gets a reference to the HUD specified, returns nullptr if never added to the user interface subsystem

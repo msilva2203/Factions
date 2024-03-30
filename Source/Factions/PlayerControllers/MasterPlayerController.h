@@ -7,6 +7,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Factions/Interfaces/FactionsEntityInterface.h"
 #include "Factions/Subsystems/SettingsSubsystem.h"
+#include "Subsystems/UserInterfaceSubsystem.h"
 
 #include "MasterPlayerController.generated.h"
 
@@ -41,6 +42,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Master Player Controller")
 	USettingsSubsystem* SettingsSubsystem;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Master Player Controller")
+	UUserInterfaceSubsystem* UserInterfaceSubsystem;
 
 	UFUNCTION(Exec, Category = "Master Player Controller")
 	void player_set_fov(const float NewValue);

@@ -82,6 +82,9 @@ AMasterCharacter::AMasterCharacter(const FObjectInitializer& ObjectInitializer) 
 	ListeningStaminaComponent->SetIsReplicated(false);
 	ListeningStaminaComponent->DefaultAttributeValue = 100.0f;
 
+	// Damage delares stack component
+	DamageDealersStack = CreateDefaultSubobject<UDamageDealersStack>(TEXT("Damage Dealers Stack"));
+
 	// Name tag widget component
 	NameTagViewportWidgetComponent = CreateDefaultSubobject<UViewportWidgetComponent>(TEXT("Name Tag Viewport Widget"));
 	NameTagViewportWidgetComponent->SetupAttachment(GetMesh());
@@ -575,6 +578,8 @@ EFactionsTeam AMasterCharacter::GetEntityTeam()
 
 void AMasterCharacter::DamageEntity(float Damage, AActor* DamageInstigator, AActor* Causer)
 {
+	DamageDealersStack->PushActor(DamageInstigator);
+
 	if (!IsDown())
 	{
 		HealthComponent->OffsetAttributeValue(Damage * -1.0f);
@@ -592,10 +597,16 @@ bool AMasterCharacter::IsTeammate()
 
 void AMasterCharacter::Kill()
 {
+	AActor* Main = DamageDealersStack->GetMainActor();
+	AActor* Assist = DamageDealersStack->GetAssistActor();
+	FactionsSessionSubsystem->RewardEntity(Main, ERewardAction::Execution);
+	FactionsSessionSubsystem->RewardEntity(Assist, ERewardAction::Assist);
+
 	GetWorldTimerManager().ClearTimer(DownTimeHandle);
 	if (auto PS = Cast<AMatchPlayerState>(GetPlayerState()))
 	{
 		PS->SetIsDead(true);
+		PS->AddDeath();
 	}
 }
 
@@ -1085,6 +1096,11 @@ void AMasterCharacter::HealthUpdated(const float NewValue, const float Percent)
 {
 	if (NewValue <= 0.0f)
 	{
+		AActor* Main = DamageDealersStack->GetMainActor();
+		AActor* Assist = DamageDealersStack->GetAssistActor();
+		FactionsSessionSubsystem->RewardEntity(Main, ERewardAction::Down);
+		FactionsSessionSubsystem->RewardEntity(Assist, ERewardAction::Assist);
+
 		SetCharacterState(ECharacterState::Down);
 	}
 }
@@ -1094,7 +1110,6 @@ void AMasterCharacter::DownHealthUpdated(const float NewValue, const float Perce
 	if (NewValue <= 0.0f)
 	{
 		Kill();
-		
 	}
 }
 

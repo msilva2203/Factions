@@ -5,6 +5,7 @@
 #include "Factions/Pawns/MasterCharacter.h"
 #include "Net/UnrealNetwork.h"
 #include "AdvancedUserInterface/Public/Subsystems/UserInterfaceSubsystem.h"
+#include "GameFramework/PlayerController.h"
 
 ABaseWeapon::ABaseWeapon() :
 	WeaponLevel(0)
@@ -222,7 +223,8 @@ void ABaseWeapon::FireAction()
 		GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_Visibility, Params);
 		if (HitResult.bBlockingHit)
 		{
-			GetGameInstance()->GetSubsystem<UFactionsSessionSubsystem>()->DamageEntity(HitResult.GetActor(), WeaponDamage, GetInstigator(), this);
+			APlayerState* DamageInstigator = OwningCharacter->GetPlayerState();
+			GetGameInstance()->GetSubsystem<UFactionsSessionSubsystem>()->DamageEntity(HitResult.GetActor(), WeaponDamage, DamageInstigator, this);
 		}
 
 		if (IsLocalInstance())

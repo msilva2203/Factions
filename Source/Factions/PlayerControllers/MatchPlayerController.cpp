@@ -16,17 +16,19 @@ void AMatchPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Gets a reference to all arena cameras in the map
-	TArray<AActor*> ArenaCameraActors;
-	UGameplayStatics::GetAllActorsOfClass(this, AArenaCamera::StaticClass(), ArenaCameraActors);
-	for (auto Actor : ArenaCameraActors)
+	if (IsLocalController())
 	{
-		if (auto Camera = Cast<AArenaCamera>(Actor))
+		// Gets a reference to all arena cameras in the map
+		TArray<AActor*> ArenaCameraActors;
+		UGameplayStatics::GetAllActorsOfClass(this, AArenaCamera::StaticClass(), ArenaCameraActors);
+		for (auto Actor : ArenaCameraActors)
 		{
-			ArenaCameras.Add(Camera);
+			if (auto Camera = Cast<AArenaCamera>(Actor))
+			{
+				ArenaCameras.Add(Camera);
+			}
 		}
 	}
-
 }
 
 void AMatchPlayerController::Tick(float DeltaTime)
@@ -56,12 +58,23 @@ void AMatchPlayerController::SetupInputComponent()
 		CurBinding = InputComponent->BindAction("Spectate Camera", IE_Pressed, this, &AMatchPlayerController::InputSpectateCamera);
 		CurBinding.bConsumeInput = false;
 		CurBinding = InputComponent->BindAction("Spectate Player", IE_Pressed, this, &AMatchPlayerController::InputSpectatePlayer);
+		CurBinding.bConsumeInput = false;
+		CurBinding = InputComponent->BindAction("Show Scoreboard", IE_Pressed, this, &AMatchPlayerController::InputShowScoreboard);
+		CurBinding.bConsumeInput = false;
 	}
 }
 
 void AMatchPlayerController::SetupPlayerController()
 {
 	Super::SetupPlayerController();
+
+	if (IsLocalController())
+	{
+		// Creates game HUD and scoreboard
+		UserInterfaceSubsystem->PushHUD(GameModeHUDClass, true);
+		UserInterfaceSubsystem->PushHUD(MainHUDClass, true);
+		UserInterfaceSubsystem->PushHUD(ScoreboardClass, true);
+	}
 
 	if (auto PS = GetPlayerState<AMatchPlayerState>())
 	{
@@ -126,19 +139,39 @@ void AMatchPlayerController::PlayerMatchStateUpdated(const EPlayerMatchState New
 		break;
 	case EPlayerMatchState::Spectating:
 
-		SetInputMode(FInputModeGameOnly());
-		bShowMouseCursor = false;
-
-		if (!ArenaCameras.IsEmpty())
+		if (IsLocalController())
 		{
-			SpectateCamera(ArenaCameras[SpectatingCameraIndex]);
+			UBaseHUD* MainHUD = UserInterfaceSubsystem->GetHUD(MainHUDClass);
+
+			SetInputMode(FInputModeGameOnly());
+			bShowMouseCursor = false;
+
+			if (!ArenaCameras.IsEmpty())
+			{
+				SpectateCamera(ArenaCameras[SpectatingCameraIndex]);
+			}
+
+			if (MainHUD)
+			{
+				UserInterfaceSubsystem->HideHUD(MainHUD, true);
+			}
 		}
 
 		break;
 	case EPlayerMatchState::Playing:
 
-		SetInputMode(FInputModeGameOnly());
-		bShowMouseCursor = false;
+		if (IsLocalController())
+		{
+			UBaseHUD* MainHUD = UserInterfaceSubsystem->GetHUD(MainHUDClass);
+
+			SetInputMode(FInputModeGameOnly());
+			bShowMouseCursor = false;
+
+			if (MainHUD)
+			{
+				UserInterfaceSubsystem->DisplayHUD(MainHUD, true);
+			}
+		}
 
 		break;
 	default:
@@ -183,4 +216,10 @@ void AMatchPlayerController::InputSpectatePlayer()
 	{
 
 	}
+}
+
+void AMatchPlayerController::InputShowScoreboard()
+{
+	UBaseHUD* Scoreboard = UserInterfaceSubsystem->GetHUD(ScoreboardClass);
+	UserInterfaceSubsystem->ToggleHUD(Scoreboard, false);
 }
